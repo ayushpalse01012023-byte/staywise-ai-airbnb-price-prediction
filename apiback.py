@@ -183,4 +183,4 @@ def predict_price(listing: ListingFeatures):
 
     except Exception as e:
         # Catch-all for unexpected errors (e.g. shape mismatches, model errors).
-        raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}") 
