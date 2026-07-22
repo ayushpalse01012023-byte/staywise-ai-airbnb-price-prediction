@@ -24,9 +24,9 @@ const TECHNOLOGIES = [
 ];
 
 const SOCIAL_LINKS = [
-  { label: 'GitHub', href: 'https://github.com', icon: FiGithub },
+  { label: 'GitHub', href: 'https://github.com/ayushpalse01012023-byte', icon: FiGithub },
   { label: 'LinkedIn', href: 'https://linkedin.com', icon: FiLinkedin },
-  { label: 'Email', href: 'mailto:hello@staywise.ai', icon: FiMail },
+  { label: 'Email', href: 'mailto:ayushpalse01012023@gmail.com', icon: FiMail },
 ];
 
 const fadeUp = {
@@ -43,12 +43,10 @@ function Footer() {
 
   return (
     <footer className="relative border-t border-white/10 bg-black/40 backdrop-blur-xl">
-      {/* subtle top glow */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-rose-500/50 to-transparent" />
 
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Brand */}
           <motion.div
             variants={fadeUp}
             initial="hidden"
@@ -74,7 +72,6 @@ function Footer() {
             </p>
           </motion.div>
 
-          {/* Quick Links */}
           <motion.div
             variants={fadeUp}
             initial="hidden"
@@ -102,7 +99,6 @@ function Footer() {
             </ul>
           </motion.div>
 
-          {/* Technologies */}
           <motion.div
             variants={fadeUp}
             initial="hidden"
@@ -125,7 +121,6 @@ function Footer() {
             </ul>
           </motion.div>
 
-          {/* Contact / GitHub */}
           <motion.div
             variants={fadeUp}
             initial="hidden"
@@ -159,14 +154,21 @@ function Footer() {
           </motion.div>
         </div>
 
-        {/* Bottom bar */}
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 sm:flex-row">
           <p className="text-xs text-gray-500">
             &copy; {year} StayWise AI. All rights reserved.
           </p>
           <p className="text-xs text-gray-500">
-            Built with <span className="text-rose-400">♥</span> using React
-            &amp; FastAPI
+            Designed &amp; Developed by{' '}
+            <motion.a
+              href="https://github.com/ayushpalse01012023-byte"
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={{ scale: 1.05 }}
+              className="cursor-pointer bg-gradient-to-r from-rose-400 to-indigo-400 bg-clip-text font-semibold text-transparent transition-all duration-300 hover:drop-shadow-[0_0_8px_rgba(244,63,94,0.5)]"
+            >
+              Ayush Palse
+            </motion.a>
           </p>
         </div>
       </div>
