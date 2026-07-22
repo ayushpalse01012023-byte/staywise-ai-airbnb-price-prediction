@@ -7,79 +7,61 @@ import {
   useAnimationFrame,
 } from 'framer-motion';
 import { NavLink } from 'react-router-dom';
-import {
-  HiOutlineSparkles,
-  HiOutlineArrowRight,
-  HiOutlineCpuChip,
-  HiOutlineBoltSlash,
-} from 'react-icons/hi2';
-import {
-  HiOutlineLocationMarker,
-  HiOutlineLightningBolt,
-  HiOutlineChip,
-} from 'react-icons/hi';
-import { SiReact, SiFastapi, SiPython } from 'react-icons/si';
-import { TbBrandPython } from 'react-icons/tb';
+import { HiOutlineSparkles, HiOutlineArrowRight, HiOutlineSignal } from 'react-icons/hi2';
+import { HiOutlineLocationMarker, HiOutlineLightningBolt, HiOutlineChip } from 'react-icons/hi';
 
-const AI_LINE_ONE = 'Predict Airbnb Prices';
-const AI_LINE_TWO = ['with', 'Artificial', 'Intelligence'];
+/* ============================================================== */
+/* Static content                                                   */
+/* ============================================================== */
 
-const TECH_CHIPS = [
-  { label: 'React', icon: SiReact },
-  { label: 'FastAPI', icon: SiFastapi },
-  { label: 'XGBoost', icon: TbBrandPython },
-  { label: 'Python', icon: SiPython },
-  { label: 'Machine Learning', icon: HiOutlineCpuChip },
-];
+const HISTORY_SEED = { location: 'Downtown Loft', price: 184, confidence: 96.8 };
 
-const HISTORY_SEED = [
-  { id: 1, location: 'Downtown Loft', price: 184, confidence: 96.8 },
-  { id: 2, location: 'Beachside Villa', price: 312, confidence: 94.1 },
-  { id: 3, location: 'Studio Midtown', price: 96, confidence: 91.4 },
-];
+/* ============================================================== */
+/* Utilities                                                        */
+/* ============================================================== */
 
 function randomBetween(min, max) {
   return Math.random() * (max - min) + min;
 }
 
+// Sparse, calm particle field — atmosphere, not noise
 function useParticles(count) {
   return useMemo(
     () =>
       Array.from({ length: count }, (_, i) => ({
         id: i,
-        size: randomBetween(1, 4),
+        size: randomBetween(1, 2.6),
         top: randomBetween(0, 100),
         left: randomBetween(0, 100),
-        duration: randomBetween(6, 20),
-        delay: randomBetween(0, 8),
-        blur: Math.random() > 0.7,
-        opacity: randomBetween(0.2, 0.8),
+        duration: randomBetween(10, 22),
+        delay: randomBetween(0, 10),
+        opacity: randomBetween(0.08, 0.35),
       })),
     [count]
   );
 }
 
+// Fewer nodes, dimmer lines — depth cue rather than a focal element
 function useNeuralNodes(count) {
   return useMemo(() => {
     const nodes = Array.from({ length: count }, (_, i) => ({
       id: i,
-      x: randomBetween(5, 95),
-      y: randomBetween(5, 95),
-      r: randomBetween(1.5, 3),
-      delay: randomBetween(0, 4),
+      x: randomBetween(8, 92),
+      y: randomBetween(8, 92),
+      delay: randomBetween(0, 5),
     }));
     const links = [];
     nodes.forEach((node, i) => {
       const next = nodes[(i + 1) % nodes.length];
-      const skip = nodes[(i + 3) % nodes.length];
-      links.push({ id: `${node.id}-${next.id}`, a: node, b: next, delay: randomBetween(0, 5) });
-      if (i % 2 === 0) {
-        links.push({ id: `${node.id}-${skip.id}`, a: node, b: skip, delay: randomBetween(0, 5) });
-      }
+      links.push({ id: `${node.id}-${next.id}`, a: node, b: next, delay: randomBetween(0, 6) });
     });
     return { nodes, links };
   }, [count]);
 }
+
+/* ============================================================== */
+/* Building blocks                                                  */
+/* ============================================================== */
 
 function AnimatedCounter({ from = 0, to, duration = 1.4, delay = 0, prefix = '', suffix = '', decimals = 0 }) {
   const [value, setValue] = useState(from);
@@ -99,7 +81,7 @@ function AnimatedCounter({ from = 0, to, duration = 1.4, delay = 0, prefix = '',
   });
 
   return (
-    <span>
+    <span className="tabular-nums">
       {prefix}
       {value.toFixed(decimals)}
       {suffix}
@@ -107,129 +89,28 @@ function AnimatedCounter({ from = 0, to, duration = 1.4, delay = 0, prefix = '',
   );
 }
 
-function ConfidenceRing({ percentage = 96.8, size = 88, stroke = 7 }) {
-  const radius = (size - stroke) / 2;
-  const circumference = 2 * Math.PI * radius;
-
-  return (
-    <div className="relative" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={radius} stroke="rgba(255,255,255,0.08)" strokeWidth={stroke} fill="none" />
-        <motion.circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke="url(#stwRing)"
-          strokeWidth={stroke}
-          strokeLinecap="round"
-          fill="none"
-          strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: circumference * (1 - percentage / 100) }}
-          transition={{ duration: 1.4, delay: 0.5, ease: 'easeOut' }}
-        />
-        <defs>
-          <linearGradient id="stwRing" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#fb7185" />
-            <stop offset="50%" stopColor="#c084fc" />
-            <stop offset="100%" stopColor="#818cf8" />
-          </linearGradient>
-        </defs>
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-base font-bold text-white">
-          <AnimatedCounter to={percentage} decimals={1} delay={0.5} duration={1.3} />%
-        </span>
-        <span className="text-[9px] uppercase tracking-widest text-gray-500">Confidence</span>
-      </div>
-    </div>
-  );
-}
-
-function MetricBar({ label, percentage, delay = 0, color = 'from-rose-400 to-indigo-400' }) {
-  return (
-    <div>
-      <div className="mb-1 flex items-center justify-between text-[10px] text-gray-400">
-        <span>{label}</span>
-        <span className="text-gray-300">{percentage}%</span>
-      </div>
-      <div className="h-1 w-full overflow-hidden rounded-full bg-white/5">
-        <motion.div
-          className={`h-full rounded-full bg-gradient-to-r ${color}`}
-          initial={{ width: 0 }}
-          animate={{ width: `${percentage}%` }}
-          transition={{ duration: 1.1, delay, ease: 'easeOut' }}
-        />
-      </div>
-    </div>
-  );
-}
-
-function Sparkline({ points }) {
-  return (
-    <svg viewBox="0 0 110 40" className="h-10 w-full overflow-visible">
-      <motion.polyline
-        points={points}
-        fill="none"
-        stroke="url(#stwSpark)"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        initial={{ pathLength: 0, opacity: 0 }}
-        animate={{ pathLength: 1, opacity: 1 }}
-        transition={{ duration: 1, ease: 'easeOut' }}
-      />
-      <defs>
-        <linearGradient id="stwSpark" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#fb7185" />
-          <stop offset="100%" stopColor="#818cf8" />
-        </linearGradient>
-      </defs>
-    </svg>
-  );
-}
-
-function NeuralHeatmap() {
-  const cells = useMemo(() => Array.from({ length: 24 }, (_, i) => i), []);
-  return (
-    <div className="grid grid-cols-8 gap-1">
-      {cells.map((i) => (
-        <span
-          key={i}
-          className="stw-heat-cell block h-2 w-2 rounded-sm bg-gradient-to-br from-rose-400 to-indigo-400"
-          style={{ animationDelay: `${(i % 8) * 0.15 + Math.floor(i / 8) * 0.1}s` }}
-        />
-      ))}
-    </div>
-  );
-}
-
 function MagneticButton({ children, className = '', as: Component = 'button', ...props }) {
   const ref = useRef(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const springX = useSpring(x, { stiffness: 200, damping: 15, mass: 0.3 });
-  const springY = useSpring(y, { stiffness: 200, damping: 15, mass: 0.3 });
+  const springX = useSpring(x, { stiffness: 180, damping: 16, mass: 0.3 });
+  const springY = useSpring(y, { stiffness: 180, damping: 16, mass: 0.3 });
   const [ripples, setRipples] = useState([]);
 
   const handleMouseMove = (e) => {
     const rect = ref.current.getBoundingClientRect();
-    x.set((e.clientX - rect.left - rect.width / 2) * 0.3);
-    y.set((e.clientY - rect.top - rect.height / 2) * 0.3);
+    x.set((e.clientX - rect.left - rect.width / 2) * 0.25);
+    y.set((e.clientY - rect.top - rect.height / 2) * 0.25);
   };
-
   const handleMouseLeave = () => {
     x.set(0);
     y.set(0);
   };
-
   const handleClick = (e) => {
     const rect = ref.current.getBoundingClientRect();
     const id = Date.now();
-    const rx = e.clientX - rect.left;
-    const ry = e.clientY - rect.top;
-    setRipples((prev) => [...prev, { id, x: rx, y: ry }]);
-    window.setTimeout(() => setRipples((prev) => prev.filter((r) => r.id !== id)), 650);
+    setRipples((prev) => [...prev, { id, x: e.clientX - rect.left, y: e.clientY - rect.top }]);
+    window.setTimeout(() => setRipples((prev) => prev.filter((r) => r.id !== id)), 700);
   };
 
   return (
@@ -246,8 +127,8 @@ function MagneticButton({ children, className = '', as: Component = 'button', ..
         {ripples.map((r) => (
           <span
             key={r.id}
-            className="pointer-events-none absolute rounded-full bg-white/30"
-            style={{ left: r.x, top: r.y, width: 12, height: 12, transform: 'translate(-50%, -50%)', animation: 'stw-ripple 0.65s ease-out forwards' }}
+            className="pointer-events-none absolute rounded-full bg-white/25"
+            style={{ left: r.x, top: r.y, width: 10, height: 10, transform: 'translate(-50%, -50%)', animation: 'stw-ripple 0.7s ease-out forwards' }}
           />
         ))}
       </Component>
@@ -255,25 +136,116 @@ function MagneticButton({ children, className = '', as: Component = 'button', ..
   );
 }
 
+function ConfidenceRing({ percentage = 96.8, size = 84, stroke = 6 }) {
+  const radius = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * radius;
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <motion.div
+        className="absolute inset-0 rounded-full"
+        style={{ boxShadow: '0 0 24px rgba(190,60,110,0.25)' }}
+        animate={{ opacity: [0.5, 0.9, 0.5] }}
+        transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <svg width={size} height={size} className="-rotate-90">
+        <circle cx={size / 2} cy={size / 2} r={radius} stroke="rgba(255,255,255,0.07)" strokeWidth={stroke} fill="none" />
+        <motion.circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="url(#stwRingRefined)"
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          fill="none"
+          strokeDasharray={circumference}
+          initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset: circumference * (1 - percentage / 100) }}
+          transition={{ duration: 1.6, delay: 0.7, ease: 'easeOut' }}
+        />
+        <defs>
+          <linearGradient id="stwRingRefined" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#fb7185" />
+            <stop offset="55%" stopColor="#a78bfa" />
+            <stop offset="100%" stopColor="#818cf8" />
+          </linearGradient>
+        </defs>
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-[15px] font-semibold text-white">
+          <AnimatedCounter to={percentage} decimals={1} delay={0.7} duration={1.4} />%
+        </span>
+        <span className="mt-0.5 text-[9px] font-medium uppercase tracking-[0.15em] text-gray-500">Confidence</span>
+      </div>
+    </div>
+  );
+}
+
+function MetricBar({ label, percentage, delay = 0 }) {
+  return (
+    <div>
+      <div className="mb-1.5 flex items-center justify-between text-[10px] font-medium text-gray-500">
+        <span>{label}</span>
+        <span className="text-gray-400">{percentage}%</span>
+      </div>
+      <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.06]">
+        <motion.div
+          className="h-full rounded-full bg-gradient-to-r from-rose-400/80 to-indigo-400/80"
+          initial={{ width: 0 }}
+          animate={{ width: `${percentage}%` }}
+          transition={{ duration: 1.2, delay, ease: 'easeOut' }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function Sparkline({ points }) {
+  return (
+    <svg viewBox="0 0 110 36" className="h-9 w-full overflow-visible">
+      <motion.polyline
+        points={points}
+        fill="none"
+        stroke="url(#stwSparkRefined)"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={{ pathLength: 1, opacity: 1 }}
+        transition={{ duration: 1.1, ease: 'easeOut' }}
+      />
+      <defs>
+        <linearGradient id="stwSparkRefined" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#fb7185" />
+          <stop offset="100%" stopColor="#818cf8" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+/* ============================================================== */
+/* Hero Section                                                     */
+/* ============================================================== */
+
 function HeroSection() {
   const sectionRef = useRef(null);
+
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-  const glowX = useSpring(mouseX, { stiffness: 50, damping: 20 });
-  const glowY = useSpring(mouseY, { stiffness: 50, damping: 20 });
+  const glowX = useSpring(mouseX, { stiffness: 45, damping: 22 });
+  const glowY = useSpring(mouseY, { stiffness: 45, damping: 22 });
 
-  const parallaxX = useSpring(0, { stiffness: 40, damping: 20 });
-  const parallaxY = useSpring(0, { stiffness: 40, damping: 20 });
+  const parallaxX = useSpring(0, { stiffness: 35, damping: 22 });
+  const parallaxY = useSpring(0, { stiffness: 35, damping: 22 });
 
-  const cardRotateX = useSpring(0, { stiffness: 150, damping: 20 });
-  const cardRotateY = useSpring(0, { stiffness: 150, damping: 20 });
+  const cardRotateX = useSpring(0, { stiffness: 140, damping: 22 });
+  const cardRotateY = useSpring(0, { stiffness: 140, damping: 22 });
 
-  const particles = useParticles(140);
-  const { nodes, links } = useNeuralNodes(18);
+  const particles = useParticles(48);
+  const { nodes, links } = useNeuralNodes(10);
 
-  const [history, setHistory] = useState(HISTORY_SEED);
-  const [sparkPoints, setSparkPoints] = useState('0,30 15,24 30,28 45,16 60,20 75,8 90,14 105,4');
-  const [metrics, setMetrics] = useState({ gpu: 82, cpu: 47, ram: 63, inference: 0.18 });
+  const [sparkPoints, setSparkPoints] = useState('0,26 15,20 30,24 45,14 60,18 75,8 90,12 105,3');
+  const [price, setPrice] = useState(HISTORY_SEED.price);
 
   useEffect(() => {
     const handleMove = (e) => {
@@ -283,8 +255,8 @@ function HeroSection() {
       mouseY.set(e.clientY - rect.top);
       const relX = (e.clientX - rect.left) / rect.width - 0.5;
       const relY = (e.clientY - rect.top) / rect.height - 0.5;
-      parallaxX.set(relX * -20);
-      parallaxY.set(relY * -20);
+      parallaxX.set(relX * -14);
+      parallaxY.set(relY * -14);
     };
     const node = sectionRef.current;
     node?.addEventListener('mousemove', handleMove);
@@ -293,28 +265,16 @@ function HeroSection() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setHistory((prev) =>
-        prev.map((item) => ({
-          ...item,
-          price: Math.max(60, Math.round(item.price + randomBetween(-6, 6))),
-          confidence: Math.min(99.9, Math.max(88, +(item.confidence + randomBetween(-0.6, 0.6)).toFixed(1))),
-        }))
-      );
+      setPrice((prev) => Math.max(90, Math.round(prev + randomBetween(-5, 5))));
       setSparkPoints((prev) => {
         const vals = prev.split(' ').map((p) => p.split(',').map(Number));
         const shifted = vals.slice(1).map((v, i) => [i * 15, v[1]]);
-        const lastY = shifted[shifted.length - 1]?.[1] ?? 20;
-        const newY = Math.min(38, Math.max(2, lastY + randomBetween(-8, 8)));
+        const lastY = shifted[shifted.length - 1]?.[1] ?? 16;
+        const newY = Math.min(34, Math.max(2, lastY + randomBetween(-6, 6)));
         shifted.push([105, newY]);
         return shifted.map(([x, y]) => `${x},${y}`).join(' ');
       });
-      setMetrics((prev) => ({
-        gpu: Math.min(98, Math.max(40, Math.round(prev.gpu + randomBetween(-5, 5)))),
-        cpu: Math.min(90, Math.max(20, Math.round(prev.cpu + randomBetween(-5, 5)))),
-        ram: Math.min(95, Math.max(30, Math.round(prev.ram + randomBetween(-5, 5)))),
-        inference: +Math.min(0.4, Math.max(0.08, prev.inference + randomBetween(-0.03, 0.03))).toFixed(2),
-      }));
-    }, 2600);
+    }, 3600);
     return () => clearInterval(interval);
   }, []);
 
@@ -322,97 +282,118 @@ function HeroSection() {
     const rect = e.currentTarget.getBoundingClientRect();
     const relX = (e.clientX - rect.left) / rect.width - 0.5;
     const relY = (e.clientY - rect.top) / rect.height - 0.5;
-    cardRotateY.set(relX * 14);
-    cardRotateX.set(-relY * 14);
+    cardRotateY.set(relX * 8);
+    cardRotateX.set(-relY * 8);
   };
-
   const handleCardMouseLeave = () => {
     cardRotateX.set(0);
     cardRotateY.set(0);
   };
 
-  const glowBackground = useTransform([glowX, glowY], ([x, y]) => `radial-gradient(650px circle at ${x}px ${y}px, rgba(244,63,94,0.14), transparent 70%)`);
+  const glowBackground = useTransform(
+    [glowX, glowY],
+    ([x, y]) => `radial-gradient(600px circle at ${x}px ${y}px, rgba(190,60,110,0.10), transparent 72%)`
+  );
 
   return (
-    <section ref={sectionRef} className="relative flex min-h-screen items-center overflow-hidden bg-black pt-16">
+    <section ref={sectionRef} className="relative flex min-h-screen items-center overflow-hidden bg-[#050506] pt-16">
       <style>{`
         @keyframes stw-ripple {
-          from { width: 12px; height: 12px; opacity: 0.5; }
-          to { width: 240px; height: 240px; margin-left: -112px; margin-top: -112px; opacity: 0; }
+          from { width: 10px; height: 10px; opacity: 0.45; }
+          to { width: 220px; height: 220px; margin-left: -105px; margin-top: -105px; opacity: 0; }
         }
         @keyframes stw-grid-drift {
           from { background-position: 0 0; }
-          to { background-position: 80px 80px; }
+          to { background-position: 90px 90px; }
         }
         @keyframes stw-shimmer {
           from { background-position: -200% 0; }
           to { background-position: 200% 0; }
         }
-        @keyframes stw-outline-pulse {
-          0%, 100% { -webkit-text-stroke: 1.5px rgba(255,255,255,0.7); color: transparent; }
-          50% { -webkit-text-stroke: 1.5px rgba(244,63,94,0.9); color: transparent; }
-        }
-        @keyframes stw-particle-float {
+        @keyframes stw-particle-drift {
           0% { transform: translate3d(0,0,0); opacity: var(--stw-op); }
-          50% { transform: translate3d(6px,-16px,0); opacity: calc(var(--stw-op) + 0.15); }
+          50% { transform: translate3d(4px,-10px,0); opacity: calc(var(--stw-op) + 0.1); }
           100% { transform: translate3d(0,0,0); opacity: var(--stw-op); }
         }
-        @keyframes stw-heat-pulse {
-          0%, 100% { opacity: 0.15; transform: scale(0.85); }
-          50% { opacity: 0.9; transform: scale(1); }
-        }
-        .stw-heat-cell {
-          animation: stw-heat-pulse 2.4s ease-in-out infinite;
-        }
-        @keyframes stw-ray-sweep {
-          0% { transform: translateX(-30%) rotate(8deg); opacity: 0; }
-          50% { opacity: 0.5; }
-          100% { transform: translateX(130%) rotate(8deg); opacity: 0; }
-        }
         @keyframes stw-node-pulse {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 1; }
+          0%, 100% { opacity: 0.12; }
+          50% { opacity: 0.4; }
+        }
+        @keyframes stw-signal-pulse {
+          0% { transform: scale(0.6); opacity: 0.7; }
+          100% { transform: scale(2); opacity: 0; }
+        }
+        @keyframes stw-breathe {
+          0%, 100% { opacity: 0.28; transform: scale(1); }
+          50% { opacity: 0.42; transform: scale(1.03); }
         }
       `}</style>
 
+      {/* Layer 1 — deep ambient color wash (burgundy / violet / soft blue, controlled) */}
       <motion.div className="pointer-events-none absolute inset-0" style={{ x: parallaxX, y: parallaxY }}>
         <motion.div
-          className="absolute -left-40 -top-24 h-[36rem] w-[36rem] rounded-full bg-rose-500/25 blur-[110px]"
-          animate={{ x: [0, 70, -20, 0], y: [0, 50, -30, 0] }}
-          transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div
-          className="absolute right-[-10rem] top-0 h-[40rem] w-[40rem] rounded-full bg-indigo-500/25 blur-[120px]"
-          animate={{ x: [0, -60, 30, 0], y: [0, 60, -20, 0] }}
-          transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div
-          className="absolute bottom-[-12rem] left-1/3 h-[34rem] w-[34rem] rounded-full bg-fuchsia-500/20 blur-[110px]"
-          animate={{ x: [0, 50, -40, 0], y: [0, -40, 30, 0] }}
+          className="absolute -left-32 -top-16 h-[34rem] w-[34rem] rounded-full bg-rose-900/25 blur-[130px]"
+          animate={{ x: [0, 40, -10, 0], y: [0, 30, -15, 0] }}
           transition={{ duration: 24, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
-          className="absolute right-1/4 bottom-0 h-80 w-80 rounded-full bg-blue-500/20 blur-[100px]"
-          animate={{ x: [0, -40, 20, 0], y: [0, 30, -20, 0] }}
-          transition={{ duration: 17, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute right-[-8rem] top-6 h-[32rem] w-[32rem] rounded-full bg-indigo-900/25 blur-[130px]"
+          animate={{ x: [0, -35, 15, 0], y: [0, 35, -10, 0] }}
+          transition={{ duration: 26, repeat: Infinity, ease: 'easeInOut' }}
         />
+        <motion.div
+          className="absolute bottom-[-10rem] left-1/3 h-[28rem] w-[28rem] rounded-full bg-fuchsia-900/15 blur-[120px]"
+          animate={{ x: [0, 25, -20, 0], y: [0, -20, 15, 0] }}
+          transition={{ duration: 28, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <div className="absolute right-1/4 bottom-0 h-64 w-64 rounded-full bg-sky-900/10 blur-[110px]" style={{ animation: 'stw-breathe 12s ease-in-out infinite' }} />
       </motion.div>
 
+      {/* Layer 2 — subtle grid */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-40"
-        style={{ background: 'radial-gradient(1200px circle at 20% 30%, rgba(244,63,94,0.08), transparent 60%), radial-gradient(1000px circle at 80% 70%, rgba(129,140,248,0.08), transparent 60%)' }}
-      />
-
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.06]"
+        className="pointer-events-none absolute inset-0 opacity-[0.035]"
         style={{
-          backgroundImage: 'linear-gradient(rgba(255,255,255,0.7) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.7) 1px, transparent 1px)',
-          backgroundSize: '70px 70px',
-          animation: 'stw-grid-drift 12s linear infinite',
-          maskImage: 'radial-gradient(ellipse 65% 65% at 50% 40%, black 40%, transparent 90%)',
+          backgroundImage:
+            'linear-gradient(rgba(255,255,255,0.7) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.7) 1px, transparent 1px)',
+          backgroundSize: '80px 80px',
+          animation: 'stw-grid-drift 16s linear infinite',
+          maskImage: 'radial-gradient(ellipse 60% 60% at 50% 40%, black 30%, transparent 85%)',
         }}
       />
 
+      {/* Layer 3 — neural network, dimmed to a whisper */}
+      <svg className="pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+        {links.map((link) => (
+          <line
+            key={link.id}
+            x1={link.a.x}
+            y1={link.a.y}
+            x2={link.b.x}
+            y2={link.b.y}
+            stroke="url(#stwNeuralRefined)"
+            strokeWidth="0.1"
+            style={{ animation: `stw-node-pulse ${5 + link.delay}s ease-in-out ${link.delay}s infinite` }}
+          />
+        ))}
+        {nodes.map((node) => (
+          <circle
+            key={node.id}
+            cx={node.x}
+            cy={node.y}
+            r="0.35"
+            fill="#e879a8"
+            style={{ animation: `stw-node-pulse ${4 + node.delay}s ease-in-out ${node.delay}s infinite` }}
+          />
+        ))}
+        <defs>
+          <linearGradient id="stwNeuralRefined" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#fb7185" />
+            <stop offset="100%" stopColor="#818cf8" />
+          </linearGradient>
+        </defs>
+      </svg>
+
+      {/* Layer 4 — sparse particles / star field */}
       <div className="pointer-events-none absolute inset-0">
         {particles.map((p) => (
           <span
@@ -423,175 +404,95 @@ function HeroSection() {
               left: `${p.left}%`,
               width: p.size,
               height: p.size,
-              filter: p.blur ? 'blur(1px)' : 'none',
-              boxShadow: p.size > 2.5 ? '0 0 6px rgba(255,255,255,0.6)' : 'none',
               '--stw-op': p.opacity,
               opacity: p.opacity,
-              animation: `stw-particle-float ${p.duration}s ease-in-out ${p.delay}s infinite`,
+              animation: `stw-particle-drift ${p.duration}s ease-in-out ${p.delay}s infinite`,
             }}
           />
         ))}
       </div>
 
-      <svg className="pointer-events-none absolute inset-0 h-full w-full opacity-70" preserveAspectRatio="none" viewBox="0 0 100 100">
-        {links.map((link) => (
-          <line
-            key={link.id}
-            x1={link.a.x}
-            y1={link.a.y}
-            x2={link.b.x}
-            y2={link.b.y}
-            stroke="url(#stwNeural)"
-            strokeWidth="0.15"
-            style={{ animation: `stw-node-pulse ${4 + link.delay}s ease-in-out ${link.delay}s infinite` }}
-          />
-        ))}
-        {nodes.map((node) => (
-          <circle
-            key={node.id}
-            cx={node.x}
-            cy={node.y}
-            r={node.r * 0.25}
-            fill="#f472b6"
-            style={{ animation: `stw-node-pulse ${3 + node.delay}s ease-in-out ${node.delay}s infinite` }}
-          />
-        ))}
-        <defs>
-          <linearGradient id="stwNeural" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#fb7185" />
-            <stop offset="100%" stopColor="#818cf8" />
-          </linearGradient>
-        </defs>
-      </svg>
-
-      <div className="pointer-events-none absolute left-1/4 top-1/3 h-72 w-72 rounded-full border border-white/10 opacity-30 backdrop-blur-sm" />
-      <div className="pointer-events-none absolute right-1/5 bottom-1/4 h-56 w-56 rounded-full border border-white/10 opacity-20 backdrop-blur-sm" />
-
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div
-          className="absolute left-[-20%] top-1/4 h-24 w-[60%] bg-gradient-to-r from-transparent via-white/10 to-transparent"
-          style={{ animation: 'stw-ray-sweep 9s linear infinite' }}
-        />
-        <div
-          className="absolute left-[-20%] top-2/3 h-16 w-[50%] bg-gradient-to-r from-transparent via-rose-300/10 to-transparent"
-          style={{ animation: 'stw-ray-sweep 13s linear 3s infinite' }}
-        />
-      </div>
-
-      <motion.div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: 'repeating-linear-gradient(180deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 3px)',
-        }}
-        animate={{ opacity: [0.4, 0.7, 0.4] }}
-        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-      />
-
-      <svg className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.03] mix-blend-overlay">
-        <filter id="stwNoise">
+      {/* Layer 5 — fine grain */}
+      <svg className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.025] mix-blend-overlay">
+        <filter id="stwNoiseRefined">
           <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" />
         </filter>
-        <rect width="100%" height="100%" filter="url(#stwNoise)" />
+        <rect width="100%" height="100%" filter="url(#stwNoiseRefined)" />
       </svg>
 
+      {/* Layer 6 — mouse-reactive spotlight, very soft */}
       <motion.div className="pointer-events-none absolute inset-0" style={{ background: glowBackground }} />
 
-      <div className="relative mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-16 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:px-8">
+      {/* ---------------------------------------------------------- */}
+      {/* Content                                                     */}
+      {/* ---------------------------------------------------------- */}
+      <div className="relative mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-20 px-4 py-24 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8">
+        {/* LEFT */}
         <div className="text-center lg:text-left">
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="relative inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium text-gray-300 backdrop-blur-md"
+            transition={{ duration: 0.7 }}
+            className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-1.5 text-xs font-medium text-gray-400 backdrop-blur-md"
           >
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-rose-400" />
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400/70 opacity-75" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-rose-400" />
             </span>
-            Powered by AI
+            Powered by Machine Learning
           </motion.div>
 
-          <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-            <motion.span
-              initial={{ opacity: 0, y: 24 }}
+          {/* Refined typographic hierarchy */}
+          <div className="mt-8">
+            <motion.p
+              initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="block"
+              transition={{ duration: 0.7, delay: 0.15 }}
+              className="text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl lg:text-[2.75rem]"
             >
-              <span
-                className="inline-block"
-                style={{ animation: 'stw-outline-pulse 3s ease-in-out infinite' }}
-              >
-                Predict
-              </span>{' '}
-              <span className="text-white">Airbnb Prices</span>
-            </motion.span>
-            <span className="mt-1 flex flex-wrap items-baseline justify-center gap-x-3 lg:justify-start">
-              {AI_LINE_TWO.map((word, i) => {
-                if (word === 'with') {
-                  return (
-                    <motion.span
-                      key={word}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.3 }}
-                      className="text-white"
-                    >
-                      {word}
-                    </motion.span>
-                  );
-                }
-                if (word === 'Artificial') {
-                  return (
-                    <motion.span
-                      key={word}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.4 }}
-                      className="bg-gradient-to-r from-rose-400 to-fuchsia-400 bg-clip-text text-transparent drop-shadow-[0_0_22px_rgba(244,63,94,0.55)]"
-                    >
-                      {word}
-                    </motion.span>
-                  );
-                }
-                return (
-                  <motion.span
-                    key={word}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.5 }}
-                    className="bg-gradient-to-r from-indigo-300 via-fuchsia-300 to-rose-300 bg-[length:200%_auto] bg-clip-text text-transparent"
-                    style={{ animation: 'stw-shimmer 4s linear infinite' }}
-                  >
-                    {word}
-                  </motion.span>
-                );
-              })}
-            </span>
-          </h1>
+              Airbnb Pricing
+            </motion.p>
+            <motion.p
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.3 }}
+              className="mt-1 text-lg font-medium tracking-wide text-gray-500 sm:text-xl"
+            >
+              Powered by
+            </motion.p>
+            <motion.h1
+              initial={{ opacity: 0, y: 22 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.75, delay: 0.45 }}
+              className="mt-2 bg-gradient-to-r from-rose-300 via-fuchsia-300 to-indigo-300 bg-[length:200%_auto] bg-clip-text text-5xl font-bold leading-[1.05] tracking-tight text-transparent drop-shadow-[0_0_36px_rgba(190,90,150,0.25)] sm:text-6xl lg:text-7xl"
+              style={{ animation: 'stw-shimmer 6s linear infinite' }}
+            >
+              Artificial Intelligence
+            </motion.h1>
+          </div>
 
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.7 }}
-            className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-gray-400 sm:text-lg lg:mx-0"
+            transition={{ duration: 0.7, delay: 0.75 }}
+            className="mx-auto mt-8 max-w-lg text-base leading-relaxed text-gray-400 sm:text-lg lg:mx-0"
           >
-            StayWise AI blends a trained XGBoost regression model with real Airbnb
-            listing data to deliver instant, accurate pricing predictions — served
-            through FastAPI and visualized with live, ever-updating analytics.
+            A trained XGBoost model reads location, room type, and booking
+            history to return an instant, accurate price — served through
+            FastAPI and visualized in real time.
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.85 }}
-            className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:justify-start"
+            transition={{ duration: 0.7, delay: 0.95 }}
+            className="mt-12 flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:justify-start"
           >
             <MagneticButton
               as={NavLink}
               to="/predict"
-              className="group gap-2 rounded-full bg-gradient-to-r from-rose-500 via-fuchsia-500 to-indigo-500 bg-[length:200%_auto] px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-rose-500/25 transition-shadow duration-300 hover:shadow-rose-500/50"
-              style={{ animation: 'stw-shimmer 5s linear infinite' }}
+              className="group gap-2 rounded-full bg-gradient-to-r from-rose-500 via-fuchsia-500 to-indigo-500 bg-[length:200%_auto] px-7 py-3.5 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(190,60,110,0.25)] transition-shadow duration-500 hover:shadow-[0_8px_40px_rgba(190,60,110,0.4)]"
+              style={{ animation: 'stw-shimmer 6s linear infinite' }}
             >
               <HiOutlineSparkles className="h-4 w-4" />
               Get Prediction
@@ -601,172 +502,114 @@ function HeroSection() {
             <MagneticButton
               as="a"
               href="#features"
-              className="gap-2 rounded-full border border-white/15 bg-white/5 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur-md transition-colors duration-300 hover:bg-white/10 hover:backdrop-blur-xl"
+              className="gap-2 rounded-full border border-white/10 bg-white/[0.03] px-7 py-3.5 text-sm font-semibold text-white backdrop-blur-md transition-all duration-500 hover:border-white/20 hover:bg-white/[0.06]"
             >
               Learn More
             </MagneticButton>
           </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 1 }}
-            className="mt-8 flex flex-wrap items-center justify-center gap-3 lg:justify-start"
-          >
-            {TECH_CHIPS.map(({ label, icon: Icon }, i) => (
-              <motion.span
-                key={label}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: [0, -4, 0] }}
-                transition={{
-                  opacity: { duration: 0.4, delay: 1 + i * 0.08 },
-                  y: { duration: 4 + i * 0.4, repeat: Infinity, ease: 'easeInOut', delay: i * 0.3 },
-                }}
-                whileHover={{ y: -6, scale: 1.05 }}
-                className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-gray-300 backdrop-blur-md transition-colors duration-200 hover:border-rose-400/30 hover:text-white"
-              >
-                <Icon className="h-3.5 w-3.5 text-rose-400" />
-                {label}
-              </motion.span>
-            ))}
-          </motion.div>
         </div>
 
+        {/* RIGHT — refined prediction card */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 36 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.4 }}
-          style={{ perspective: 1200 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+          style={{ perspective: 1300 }}
           className="relative mx-auto w-full max-w-md"
         >
+          {/* Ambient glow cast behind the card */}
+          <div className="pointer-events-none absolute -inset-6 rounded-[2.5rem] bg-gradient-to-br from-rose-500/10 via-fuchsia-500/5 to-indigo-500/10 blur-2xl" />
+
           <motion.div
             onMouseMove={handleCardMouseMove}
             onMouseLeave={handleCardMouseLeave}
             style={{ rotateX: cardRotateX, rotateY: cardRotateY, transformStyle: 'preserve-3d' }}
-            className="relative rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/50 backdrop-blur-2xl sm:p-7"
+            className="relative overflow-hidden rounded-[1.75rem] border border-white/[0.08] bg-white/[0.03] p-7 shadow-[0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-2xl sm:p-8"
           >
-            <div
-              className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-rose-500/10 via-transparent to-indigo-500/10"
-              style={{ backgroundSize: '200% 200%', animation: 'stw-shimmer 6s linear infinite' }}
-            />
-            <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-b from-white/5 to-transparent" />
+            {/* inner glow + top reflection for glass depth */}
+            <div className="pointer-events-none absolute inset-0 rounded-[1.75rem] bg-gradient-to-b from-white/[0.06] via-transparent to-transparent" />
+            <div className="pointer-events-none absolute -top-1/2 left-0 h-full w-full rotate-12 bg-gradient-to-b from-white/[0.05] to-transparent" />
 
-            <div className="relative flex items-center justify-between border-b border-white/10 pb-4">
-              <div className="flex items-center gap-2">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
+            <div className="relative flex items-center justify-between border-b border-white/[0.06] pb-5">
+              <div className="flex items-center gap-2.5">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70 opacity-70" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
                 </span>
                 <div>
-                  <p className="text-xs font-semibold text-white">Prediction Engine</p>
-                  <p className="text-[10px] uppercase tracking-widest text-emerald-400">Online</p>
+                  <p className="text-[13px] font-semibold text-white">Prediction Engine</p>
+                  <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-emerald-400/80">Online</p>
                 </div>
               </div>
-              <HiOutlineChip className="h-4 w-4 text-gray-500" />
+              <HiOutlineChip className="h-4 w-4 text-gray-600" />
             </div>
 
-            <div className="relative mt-5 flex items-center justify-between">
+            <div className="relative mt-7 flex items-center justify-between">
               <div>
-                <p className="text-xs text-gray-400">Live Price Prediction</p>
-                <p className="mt-1 text-3xl font-bold text-white">
-                  <AnimatedCounter to={history[0].price} prefix="$" delay={0.6} duration={1.2} />
-                  <span className="text-sm font-medium text-gray-400">/night</span>
+                <p className="text-xs font-medium text-gray-500">Estimated Price</p>
+                <p className="mt-1.5 text-[2.5rem] font-bold leading-none text-white">
+                  <AnimatedCounter to={price} prefix="$" delay={0.9} duration={1.2} />
+                  <span className="text-base font-medium text-gray-500">/night</span>
                 </p>
-                <p className="mt-1 flex items-center gap-1 text-xs text-gray-500">
+                <p className="mt-2 flex items-center justify-center gap-1 text-xs text-gray-500 lg:justify-start">
                   <HiOutlineLocationMarker className="h-3.5 w-3.5" />
-                  {history[0].location}
+                  {HISTORY_SEED.location}
                 </p>
               </div>
-              <ConfidenceRing percentage={history[0].confidence} />
+              <ConfidenceRing percentage={HISTORY_SEED.confidence} />
             </div>
 
-            <div className="relative mt-6 grid grid-cols-3 gap-3">
-              <MetricBar label="GPU" percentage={metrics.gpu} delay={0.7} />
-              <MetricBar label="CPU" percentage={metrics.cpu} delay={0.8} color="from-indigo-400 to-blue-400" />
-              <MetricBar label="RAM" percentage={metrics.ram} delay={0.9} color="from-fuchsia-400 to-rose-400" />
+            <div className="relative mt-7 space-y-4">
+              <MetricBar label="Model Confidence" percentage={97} delay={1.05} />
+              <MetricBar label="Data Match Quality" percentage={89} delay={1.2} />
             </div>
-            <p className="relative mt-3 flex items-center gap-1.5 text-[10px] text-gray-500">
-              <HiOutlineLightningBolt className="h-3.5 w-3.5 text-rose-400" />
-              Inference time: {metrics.inference.toFixed(2)}s
-            </p>
 
-            <div className="relative mt-5 rounded-2xl border border-white/10 bg-white/5 p-4">
-              <div className="flex items-center justify-between text-[10px] text-gray-400">
-                <span>Live Activity</span>
-                <span className="text-emerald-400">Streaming</span>
+            <div className="relative mt-6 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
+              <div className="flex items-center justify-between text-[10px] font-medium text-gray-500">
+                <span className="flex items-center gap-1.5">
+                  <HiOutlineSignal className="h-3 w-3 text-rose-400/70" />
+                  Live Activity
+                </span>
+                <span className="text-emerald-400/80">Streaming</span>
               </div>
               <div className="mt-2">
                 <Sparkline points={sparkPoints} />
               </div>
-              <div className="mt-3 flex items-center justify-between text-[10px] text-gray-400">
-                <span>Neural Activity</span>
-              </div>
-              <div className="mt-2">
-                <NeuralHeatmap />
-              </div>
             </div>
 
-            <div className="relative mt-5 space-y-2 border-t border-white/10 pt-4">
-              <p className="text-[10px] uppercase tracking-widest text-gray-500">Prediction History</p>
-              {history.map((item) => (
-                <div key={item.id} className="flex items-center justify-between rounded-xl bg-white/5 px-3 py-2">
-                  <span className="text-xs text-gray-300">{item.location}</span>
-                  <div className="flex items-center gap-3 text-xs">
-                    <span className="font-semibold text-white">${item.price}</span>
-                    <span className="text-emerald-400">{item.confidence}%</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="relative mt-5 grid grid-cols-2 gap-3 border-t border-white/10 pt-4 text-center">
+            <div className="relative mt-6 grid grid-cols-3 gap-3 border-t border-white/[0.06] pt-5 text-center">
               <div>
                 <p className="text-sm font-semibold text-white">XGBoost</p>
-                <p className="text-[10px] text-gray-500">Model</p>
+                <p className="mt-0.5 text-[10px] text-gray-600">Model</p>
               </div>
               <div>
-                <p className="text-sm font-semibold text-white">
-                  <AnimatedCounter to={metrics.inference} decimals={2} delay={0.2} duration={0.8} suffix="s" />
+                <p className="text-sm font-semibold text-white">12</p>
+                <p className="mt-0.5 text-[10px] text-gray-600">Features</p>
+              </div>
+              <div>
+                <p className="flex items-center justify-center gap-1 text-sm font-semibold text-white">
+                  <HiOutlineLightningBolt className="h-3 w-3 text-rose-400/70" />
+                  <AnimatedCounter to={0.18} decimals={2} delay={0.3} duration={0.9} suffix="s" />
                 </p>
-                <p className="text-[10px] text-gray-500">Runtime</p>
+                <p className="mt-0.5 text-[10px] text-gray-600">Runtime</p>
               </div>
             </div>
-          </motion.div>
-
-          <motion.div
-            className="absolute -right-4 top-6 z-10 hidden items-center gap-2 rounded-full border border-white/10 bg-black/60 px-3.5 py-2 text-xs font-medium text-white shadow-lg shadow-black/40 backdrop-blur-xl sm:flex"
-            animate={{ y: [0, -10, 0] }}
-            transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            <HiOutlineBoltSlash className="h-3.5 w-3.5 text-rose-400" />
-            Realtime
-          </motion.div>
-          <motion.div
-            className="absolute -left-4 bottom-12 z-10 hidden items-center gap-2 rounded-full border border-white/10 bg-black/60 px-3.5 py-2 text-xs font-medium text-white shadow-lg shadow-black/40 backdrop-blur-xl sm:flex"
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            <HiOutlineCpuChip className="h-3.5 w-3.5 text-indigo-400" />
-            Neural Core
           </motion.div>
         </motion.div>
       </div>
 
+      {/* Scroll indicator */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 1.4 }}
-        className="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2"
+        transition={{ duration: 0.7, delay: 1.4 }}
+        className="absolute bottom-9 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2"
       >
-        <div className="relative flex h-9 w-6 items-start justify-center rounded-full border-2 border-white/20 p-1">
-          <div className="absolute inset-0 rounded-full shadow-[0_0_14px_rgba(244,63,94,0.35)]" />
-          <motion.span
-            className="h-1.5 w-1.5 rounded-full bg-gradient-to-b from-rose-400 to-indigo-400"
-            animate={{ y: [0, 12, 0], opacity: [1, 0.3, 1] }}
-            transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-          />
+        <div className="relative flex h-9 w-9 items-center justify-center">
+          <span className="absolute h-full w-full rounded-full border border-rose-400/25" style={{ animation: 'stw-signal-pulse 2.6s ease-out infinite' }} />
+          <span className="relative h-1.5 w-1.5 rounded-full bg-gradient-to-b from-rose-400 to-indigo-400" />
         </div>
-        <span className="text-[11px] uppercase tracking-widest text-gray-500">Explore AI</span>
+        <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-gray-600">Scroll to Explore</span>
       </motion.div>
     </section>
   );
