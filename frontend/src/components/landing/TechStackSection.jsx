@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   SiReact,
-  SiReactrouter,
   SiTailwindcss,
   SiFastapi,
   SiPython,
@@ -12,8 +11,8 @@ import {
   SiNumpy,
   SiPandas,
   SiScikitlearn,
-  SiVisualStudioCode,
 } from 'react-icons/si';
+import { FaCode, FaRoute } from 'react-icons/fa';
 import {
   HiOutlineSparkles,
   HiOutlineServerStack,
@@ -28,7 +27,7 @@ const CATEGORIES = [
     title: 'Frontend',
     items: [
       { name: 'React', icon: SiReact },
-      { name: 'React Router', icon: SiReactrouter },
+      { name: 'React Router', icon: FaRoute },
       { name: 'Tailwind CSS', icon: SiTailwindcss },
       { name: 'Framer Motion', icon: HiOutlineSparkles },
       { name: 'React Icons', icon: HiOutlineCube },
@@ -61,7 +60,7 @@ const CATEGORIES = [
     items: [
       { name: 'Git', icon: SiGit },
       { name: 'GitHub', icon: SiGithub },
-      { name: 'VS Code', icon: SiVisualstudiocode },
+      { name: 'VS Code', icon: FaCode },
       { name: 'Vite', icon: SiVite },
     ],
   },
