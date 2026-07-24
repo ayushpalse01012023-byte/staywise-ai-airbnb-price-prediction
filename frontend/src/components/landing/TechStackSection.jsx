@@ -12,7 +12,7 @@ import {
   SiNumpy,
   SiPandas,
   SiScikitlearn,
-  SiVisualstudiocode,
+  SiVisualStudioCode,
 } from 'react-icons/si';
 import {
   HiOutlineSparkles,
