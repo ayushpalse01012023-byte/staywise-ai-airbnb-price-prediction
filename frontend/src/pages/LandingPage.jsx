@@ -3,7 +3,6 @@ import StatsSection from "../components/landing/StatsSection";
 import WorkflowSection from "../components/landing/WorkflowSection";
 import FeaturesSection from "../components/landing/FeaturesSection";
 import DashboardPreviewSection from "../components/landing/DashboardPreviewSection";
-import Footer from "../components/common/Footer";
 
 function LandingPage() {
   return (
@@ -13,7 +12,6 @@ function LandingPage() {
       <WorkflowSection />
       <FeaturesSection />
       <DashboardPreviewSection />
-      <Footer />
     </>
   );
 }
