@@ -4,6 +4,7 @@ import WorkflowSection from "../components/landing/WorkflowSection";
 import FeaturesSection from "../components/landing/FeaturesSection";
 import DashboardPreviewSection from "../components/landing/DashboardPreviewSection";
 import TestimonialsSection from "../components/landing/TestimonialsSection";
+import TechStackSection from "../components/landing/TechStackSection";
 
 function LandingPage() {
   return (
@@ -14,6 +15,7 @@ function LandingPage() {
       <FeaturesSection />
       <DashboardPreviewSection />
       <TestimonialsSection />
+      <TechStackSection />
     </>
   );
 }
