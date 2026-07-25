@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring, useTransform, useAnimationFrame } from 'framer-motion';
-import { HiOutlineSparkles, HiOutlineBoltSlash, HiOutlineCpuChip, HiOutlineClock } from 'react-icons/hi2';
-import { HiOutlineLocationMarker, HiOutlineSignal } from 'react-icons/hi';
+import { HiOutlineSparkles, HiOutlineBoltSlash, HiOutlineCpuChip, HiOutlineClock, HiOutlineSignal } from 'react-icons/hi2';
+import { HiOutlineLocationMarker } from 'react-icons/hi';
 
 const FEATURE_PILLS = [
   { label: 'FastAPI Backend', icon: HiOutlineBoltSlash },
