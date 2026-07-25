@@ -11,7 +11,7 @@ import {
   HiOutlineMapPin,
 } from 'react-icons/hi2';
 import { HiOutlineCheckCircle } from 'react-icons/hi';
-import { predictPrice } from '../api/predictionApi';
+import { predictPrice } from '../../api/predictionApi';
 
 const NEIGHBOURHOOD_GROUPS = ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'];
 const NEIGHBOURHOODS = ['Williamsburg', 'Harlem', 'Astoria', 'Bushwick', 'Chelsea', 'Upper West Side'];
