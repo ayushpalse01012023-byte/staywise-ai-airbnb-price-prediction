@@ -17,11 +17,15 @@ const NEIGHBOURHOODS = ['Williamsburg', 'Harlem', 'Astoria', 'Bushwick', 'Chelse
 const ROOM_TYPES = ['Entire home/apt', 'Private room', 'Shared room'];
 
 const NUMBER_FIELDS = [
+  { id: 'latitude', label: 'Latitude', placeholder: 'e.g. 40.7128' },
+  { id: 'longitude', label: 'Longitude', placeholder: 'e.g. -74.0060' },
   { id: 'minimumNights', label: 'Minimum Nights', placeholder: 'e.g. 2' },
   { id: 'numberOfReviews', label: 'Number of Reviews', placeholder: 'e.g. 34' },
   { id: 'reviewsPerMonth', label: 'Reviews Per Month', placeholder: 'e.g. 1.4' },
   { id: 'hostListingsCount', label: 'Calculated Host Listings Count', placeholder: 'e.g. 3' },
   { id: 'availability365', label: 'Availability 365', placeholder: 'e.g. 210' },
+  { id: 'reviewYear', label: 'Review Year', placeholder: 'e.g. 2024' },
+  { id: 'reviewMonth', label: 'Review Month', placeholder: 'e.g. 6' },
 ];
 
 function randomBetween(min, max) {
@@ -292,11 +296,15 @@ function PredictionForm() {
   const [neighbourhood, setNeighbourhood] = useState('');
   const [roomType, setRoomType] = useState('');
   const [numbers, setNumbers] = useState({
+    latitude: '',
+    longitude: '',
     minimumNights: '',
     numberOfReviews: '',
     reviewsPerMonth: '',
     hostListingsCount: '',
     availability365: '',
+    reviewYear: '',
+    reviewMonth: '',
   });
 
   const handleNumberChange = (id) => (e) => {
