@@ -1,11 +1,12 @@
 import axios from "axios";
 
-const api = axios.create({
+const API = axios.create({
   baseURL: "http://127.0.0.1:8000",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  timeout: 10000,
 });
 
-export default api;
+export const predictPrice = async (listingData) => {
+  const response = await API.post("/predict", listingData);
+  return response.data;
+};
+
+export default API;
