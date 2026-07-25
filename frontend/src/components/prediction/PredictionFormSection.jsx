@@ -11,6 +11,7 @@ import {
   HiOutlineMapPin,
 } from 'react-icons/hi2';
 import { HiOutlineCheckCircle } from 'react-icons/hi';
+import { predictPrice } from '../api/predictionApi';
 
 const NEIGHBOURHOOD_GROUPS = ['Manhattan', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'];
 const NEIGHBOURHOODS = ['Williamsburg', 'Harlem', 'Astoria', 'Bushwick', 'Chelsea', 'Upper West Side'];
@@ -306,19 +307,42 @@ function PredictionForm() {
     reviewYear: '',
     reviewMonth: '',
   });
+  const [loading, setLoading] = useState(false);
+  const [prediction, setPrediction] = useState(null);
+  const [error, setError] = useState(null);
 
   const handleNumberChange = (id) => (e) => {
     setNumbers((prev) => ({ ...prev, [id]: e.target.value }));
   };
 
-  const handleSubmit = () => {
-    // eslint-disable-next-line no-console
-    console.log('Predict Price clicked', {
-      neighbourhoodGroup,
-      neighbourhood,
-      roomType,
-      ...numbers,
-    });
+  const handleSubmit = async () => {
+    const payload = {
+      latitude: Number(numbers.latitude),
+      longitude: Number(numbers.longitude),
+      neighbourhood_group: neighbourhoodGroup,
+      neighbourhood: neighbourhood,
+      room_type: roomType,
+      minimum_nights: Number(numbers.minimumNights),
+      number_of_reviews: Number(numbers.numberOfReviews),
+      reviews_per_month: Number(numbers.reviewsPerMonth),
+      calculated_host_listings_count: Number(numbers.hostListingsCount),
+      availability_365: Number(numbers.availability365),
+      review_year: Number(numbers.reviewYear),
+      review_month: Number(numbers.reviewMonth),
+    };
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await predictPrice(payload);
+      setPrediction(result);
+      console.log('Prediction:', result);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
