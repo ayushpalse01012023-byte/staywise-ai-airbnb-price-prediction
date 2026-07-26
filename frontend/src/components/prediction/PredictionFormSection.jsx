@@ -331,13 +331,16 @@ function PredictionForm() {
       review_month: Number(numbers.reviewMonth),
     };
 
+    console.log('Payload:', payload);
+
     setLoading(true);
     setError(null);
 
     try {
       const result = await predictPrice(payload);
-      setPrediction(result);
-      console.log('Prediction:', result);
+      console.log('API Response:', result);
+      console.log('Predicted Price:', result.predicted_price);
+      setPrediction(result.predicted_price);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -396,6 +399,22 @@ function PredictionForm() {
       <div className="relative mt-7">
         <PredictButton onClick={handleSubmit} />
       </div>
+
+      {prediction !== null && (
+        <div className="relative mt-6 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
+          <p className="font-semibold text-white">
+            Predicted Price: ${prediction}
+          </p>
+        </div>
+      )}
+
+      {error && (
+        <div className="relative mt-6 rounded-xl border border-rose-500/20 bg-rose-500/10 p-4">
+          <p className="font-semibold text-white">
+            Error: {error}
+          </p>
+        </div>
+      )}
     </motion.div>
   );
 }
