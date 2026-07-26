@@ -8,6 +8,8 @@ import {
   HiOutlineChartBarSquare,
 } from 'react-icons/hi2';
 
+const USD_TO_INR = 87;
+
 function randomBetween(min, max) {
   return Math.random() * (max - min) + min;
 }
@@ -28,7 +30,7 @@ function useParticles(count) {
   );
 }
 
-function AnimatedCounter({ to, duration = 1.8, delay = 0, prefix = '', suffix = '', decimals = 0 }) {
+function AnimatedCounter({ to, duration = 1.8, delay = 0, prefix = '', suffix = '', decimals = 0, locale = false }) {
   const spanRef = useRef(null);
   const startRef = useRef(null);
   const startedRef = useRef(false);
@@ -44,13 +46,16 @@ function AnimatedCounter({ to, duration = 1.8, delay = 0, prefix = '', suffix = 
     const progress = Math.min(elapsed / duration, 1);
     const eased = 1 - Math.pow(1 - progress, 3);
     const value = to * eased;
-    spanRef.current.textContent = `${prefix}${value.toFixed(decimals)}${suffix}`;
+    const formatted = locale
+      ? value.toLocaleString('en-IN', { maximumFractionDigits: 0 })
+      : value.toFixed(decimals);
+    spanRef.current.textContent = `${prefix}${formatted}${suffix}`;
   });
 
   return (
     <span ref={spanRef} className="tabular-nums">
       {prefix}
-      {(0).toFixed(decimals)}
+      {locale ? (0).toLocaleString('en-IN', { maximumFractionDigits: 0 }) : (0).toFixed(decimals)}
       {suffix}
     </span>
   );
@@ -172,6 +177,7 @@ function PredictionResultSection({
   insight = 'Our AI analyzed multiple listing features including location, room type, host activity and historical reviews to estimate this nightly price.',
 }) {
   const particles = useParticles(30);
+  const inrPrice = predictedPrice * USD_TO_INR;
 
   return (
     <section className="relative overflow-hidden bg-[#050506] py-24 sm:py-28">
@@ -289,10 +295,15 @@ function PredictionResultSection({
               Estimated Airbnb Nightly Price
             </p>
 
-            <p className="relative mt-4 bg-gradient-to-r from-rose-300 via-fuchsia-300 to-indigo-300 bg-[length:200%_auto] bg-clip-text text-6xl font-bold leading-none tracking-[-0.02em] text-transparent drop-shadow-[0_0_40px_rgba(190,90,150,0.3)] sm:text-7xl"
+            <p
+              className="relative mt-4 bg-gradient-to-r from-rose-300 via-fuchsia-300 to-indigo-300 bg-[length:200%_auto] bg-clip-text text-6xl font-bold leading-none tracking-[-0.02em] text-transparent drop-shadow-[0_0_40px_rgba(190,90,150,0.3)] sm:text-7xl"
               style={{ animation: 'stw-shimmer 6s linear infinite' }}
             >
-              <AnimatedCounter to={predictedPrice} prefix="₹" decimals={2} delay={0.5} duration={1.8} />
+              <AnimatedCounter to={inrPrice} prefix="₹" delay={0.5} duration={1.8} locale />
+            </p>
+
+            <p className="relative mt-3 text-sm font-medium text-gray-500">
+              ≈ <AnimatedCounter to={predictedPrice} prefix="$" decimals={2} delay={0.7} duration={1.8} /> USD
             </p>
 
             <p className="relative mt-5 text-sm text-gray-400">
