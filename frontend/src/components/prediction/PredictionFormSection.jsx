@@ -398,14 +398,6 @@ function PredictionForm({ prediction, setPrediction }) {
         <PredictButton onClick={handleSubmit} loading={loading} />
       </div>
 
-      {prediction && (
-        <div className="relative mt-6 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
-          <p className="font-semibold text-white">
-            Predicted Price: ${prediction.predicted_price}
-          </p>
-        </div>
-      )}
-
       {error && (
         <div className="relative mt-6 rounded-xl border border-rose-500/20 bg-rose-500/10 p-4">
           <p className="font-semibold text-white">
