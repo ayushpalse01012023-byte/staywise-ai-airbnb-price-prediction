@@ -254,11 +254,12 @@ function FloatingNumberInput({ label, placeholder, value, onChange }) {
   );
 }
 
-function PredictButton({ onClick }) {
+function PredictButton({ onClick, loading }) {
   const ref = useRef(null);
   const [ripples, setRipples] = useState([]);
 
   const handleClick = (e) => {
+    if (loading) return;
     const rect = ref.current.getBoundingClientRect();
     const id = Date.now();
     setRipples((prev) => [...prev, { id, x: e.clientX - rect.left, y: e.clientY - rect.top }]);
@@ -271,14 +272,15 @@ function PredictButton({ onClick }) {
       ref={ref}
       type="button"
       onClick={handleClick}
+      disabled={loading}
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.98 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      className="group relative isolate flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-rose-500 via-fuchsia-500 to-indigo-500 bg-[length:200%_auto] px-8 py-4 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(190,60,110,0.25)] transition-shadow duration-500 hover:shadow-[0_10px_46px_rgba(190,60,110,0.42)]"
+      className="group relative isolate flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-rose-500 via-fuchsia-500 to-indigo-500 bg-[length:200%_auto] px-8 py-4 text-sm font-semibold text-white shadow-[0_8px_30px_rgba(190,60,110,0.25)] transition-shadow duration-500 hover:shadow-[0_10px_46px_rgba(190,60,110,0.42)] disabled:cursor-not-allowed disabled:opacity-70"
       style={{ animation: 'stw-shimmer 6s linear infinite' }}
     >
       <HiOutlineSparkles className="relative z-10 h-4 w-4 transition-transform duration-500 group-hover:rotate-[18deg]" />
-      <span className="relative z-10">Predict Price</span>
+      <span className="relative z-10">{loading ? 'Predicting...' : 'Predict Price'}</span>
       <HiOutlineArrowRight className="relative z-10 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
 
       {ripples.map((r) => (
@@ -292,7 +294,7 @@ function PredictButton({ onClick }) {
   );
 }
 
-function PredictionForm() {
+function PredictionForm({ prediction, setPrediction }) {
   const [neighbourhoodGroup, setNeighbourhoodGroup] = useState('');
   const [neighbourhood, setNeighbourhood] = useState('');
   const [roomType, setRoomType] = useState('');
@@ -308,7 +310,6 @@ function PredictionForm() {
     reviewMonth: '',
   });
   const [loading, setLoading] = useState(false);
-  const [prediction, setPrediction] = useState(null);
   const [error, setError] = useState(null);
 
   const handleNumberChange = (id) => (e) => {
@@ -331,18 +332,15 @@ function PredictionForm() {
       review_month: Number(numbers.reviewMonth),
     };
 
-    console.log('Payload:', payload);
-
     setLoading(true);
     setError(null);
 
     try {
       const result = await predictPrice(payload);
-      console.log('API Response:', result);
-      console.log('Predicted Price:', result.predicted_price);
-      setPrediction(result.predicted_price);
+      setPrediction(result);
     } catch (err) {
       setError(err.message);
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -397,13 +395,13 @@ function PredictionForm() {
       </div>
 
       <div className="relative mt-7">
-        <PredictButton onClick={handleSubmit} />
+        <PredictButton onClick={handleSubmit} loading={loading} />
       </div>
 
-      {prediction !== null && (
+      {prediction && (
         <div className="relative mt-6 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
           <p className="font-semibold text-white">
-            Predicted Price: ${prediction}
+            Predicted Price: ${prediction.predicted_price}
           </p>
         </div>
       )}
@@ -532,7 +530,7 @@ function AIAssistantCard() {
   );
 }
 
-function PredictionFormSection() {
+function PredictionFormSection({ prediction, setPrediction }) {
   const particles = useParticles(30);
 
   return (
@@ -648,7 +646,7 @@ function PredictionFormSection() {
         </div>
 
         <div className="mt-16 grid grid-cols-1 items-start gap-8 lg:grid-cols-[1.4fr_1fr] lg:gap-10">
-          <PredictionForm />
+          <PredictionForm prediction={prediction} setPrediction={setPrediction} />
           <AIAssistantCard />
         </div>
       </div>
