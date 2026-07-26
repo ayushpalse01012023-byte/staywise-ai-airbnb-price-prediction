@@ -18,10 +18,10 @@ function PredictPage() {
         setPrediction={setPrediction}
       />
 
-      {/* Show prediction result only after the API returns data */}
+      {/* Show result only after prediction is received */}
       {prediction && (
         <PredictionResultSection
-          prediction={prediction}
+          predictedPrice={prediction.predicted_price}
           confidence={94.6}
           predictionTime={0.18}
           modelName="XGBoost Regressor"
@@ -29,7 +29,6 @@ function PredictPage() {
           insight="Our AI analyzed the neighbourhood, room type, host activity, availability, location, and review patterns to estimate this nightly Airbnb price."
         />
       )}
-
       <FeatureHighlights />
     </>
   );
