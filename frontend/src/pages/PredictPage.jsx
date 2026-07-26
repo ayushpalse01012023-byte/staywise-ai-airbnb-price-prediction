@@ -4,6 +4,7 @@ import PredictionHero from "../components/prediction/PredictionHero";
 import PredictionFormSection from "../components/prediction/PredictionFormSection";
 import PredictionResultSection from "../components/prediction/PredictionResultSection";
 import FeatureHighlights from "../components/prediction/FeatureHighlights";
+import FAQ from "../components/prediction/FAQ";
 
 function PredictPage() {
   // Stores the prediction returned from FastAPI
@@ -30,6 +31,7 @@ function PredictPage() {
         />
       )}
       <FeatureHighlights />
+      <FAQ />
     </>
   );
 }
