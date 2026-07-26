@@ -6,7 +6,7 @@ import {
   HiOutlineSparkles,
   HiOutlineAdjustmentsHorizontal,
   HiOutlineRocketLaunch,
-  HiOutlineLightningBolt as HiOutlineLightning,
+  HiOutlineBolt as HiOutlineLightning,
 } from 'react-icons/hi2';
 
 function randomBetween(min, max) {
