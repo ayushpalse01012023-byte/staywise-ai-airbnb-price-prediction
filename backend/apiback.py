@@ -18,7 +18,11 @@ import pandas as pd
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+from database import engine
+from models import Base
 
+# Create all database tables
+Base.metadata.create_all(bind=engine)
 
 # ----------------------------------------------------------------------
 # 2. FASTAPI APP INITIALIZATION
