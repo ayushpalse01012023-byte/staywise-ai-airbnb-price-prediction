@@ -1,5 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
+import os
+
+print("Current Working Directory:", os.getcwd())
+print("Database Absolute Path:", os.path.abspath("staywise.db"))
 
 # SQLite database file
 DATABASE_URL = "sqlite:///staywise.db"
