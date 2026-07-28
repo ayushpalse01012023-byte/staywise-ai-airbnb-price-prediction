@@ -119,6 +119,13 @@ class PredictionResponse(BaseModel):
     # Enables Pydantic to read data directly from ORM model attributes.
     model_config = ConfigDict(from_attributes=True)
 
+class DashboardResponse(BaseModel):
+    total_predictions: int
+    average_price: float
+    highest_price: float
+    lowest_price: float
+    recent_predictions: List[PredictionResponse]
+    room_type_distribution: dict[str, int]
 
 # ----------------------------------------------------------------------
 # 6. ROOT ENDPOINT (Health Check)
@@ -268,3 +275,21 @@ def clear_prediction_history(db: Session = Depends(get_db)):
     return {
         "message": "Prediction history cleared successfully."
     }
+
+# ----------------------------------------------------------------------
+# DASHBOARD ANALYTICS
+# ----------------------------------------------------------------------
+@app.get("/dashboard", response_model=DashboardResponse)
+def get_dashboard(db: Session = Depends(get_db)):
+    """
+    Returns analytics used by the dashboard.
+    """
+
+    try:
+        return crud.get_dashboard_statistics(db)
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to load dashboard: {str(e)}"
+        )
