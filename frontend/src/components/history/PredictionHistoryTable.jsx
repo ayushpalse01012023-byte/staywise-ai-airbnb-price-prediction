@@ -7,7 +7,7 @@ import {
   HiOutlineInbox,
 } from 'react-icons/hi2';
 import { HiOutlineLocationMarker } from 'react-icons/hi';
-import { getPredictionHistory } from '../../api/historyApi';
+import { getPredictionHistory, clearPredictionHistory } from '../../api/historyApi';
 
 const containerVariants = {
   hidden: {},
@@ -213,6 +213,24 @@ function PredictionHistoryTable() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [clearing, setClearing] = useState(false);
+
+  async function handleClearHistory() {
+    if (clearing) return;
+
+    const confirmed = window.confirm('Are you sure you want to clear all prediction history? This cannot be undone.');
+    if (!confirmed) return;
+
+    setClearing(true);
+    try {
+      await clearPredictionHistory();
+      setRows([]);
+    } catch (err) {
+      alert(err?.message || 'Failed to clear prediction history. Please try again.');
+    } finally {
+      setClearing(false);
+    }
+  }
 
   useEffect(() => {
     let isMounted = true;
@@ -319,12 +337,14 @@ function PredictionHistoryTable() {
             </motion.button>
             <motion.button
               type="button"
+              onClick={handleClearHistory}
+              disabled={clearing}
               whileHover={{ y: -2 }}
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className="flex items-center gap-2 rounded-full border border-rose-500/20 bg-rose-500/[0.06] px-4 py-2.5 text-xs font-semibold text-rose-300 backdrop-blur-md transition-all duration-400 hover:border-rose-400/35 hover:bg-rose-500/[0.1]"
+              className="flex items-center gap-2 rounded-full border border-rose-500/20 bg-rose-500/[0.06] px-4 py-2.5 text-xs font-semibold text-rose-300 backdrop-blur-md transition-all duration-400 hover:border-rose-400/35 hover:bg-rose-500/[0.1] disabled:cursor-not-allowed disabled:opacity-60"
             >
               <HiOutlineTrash className="h-3.5 w-3.5" />
-              Clear History
+              {clearing ? 'Clearing...' : 'Clear History'}
             </motion.button>
           </div>
         </motion.div>
