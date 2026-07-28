@@ -253,3 +253,18 @@ def get_prediction_history(db: Session = Depends(get_db)):
     except Exception as e:
         # Catch-all for unexpected errors while reading prediction history.
         raise HTTPException(status_code=500, detail=f"Failed to fetch history: {str(e)}")
+
+# ----------------------------------------------------------------------
+# CLEAR ALL PREDICTION HISTORY
+# ----------------------------------------------------------------------
+@app.delete("/history")
+def clear_prediction_history(db: Session = Depends(get_db)):
+    """
+    Deletes every prediction stored in the SQLite database.
+    """
+
+    crud.delete_all_predictions(db)
+
+    return {
+        "message": "Prediction history cleared successfully."
+    }
