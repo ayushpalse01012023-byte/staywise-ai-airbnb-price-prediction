@@ -15,11 +15,13 @@ np.expm1() before being returned to the client.
 import joblib
 import numpy as np
 import pandas as pd
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from database import engine
+from sqlalchemy.orm import Session
+from database import engine, get_db
 from models import Base
+import crud
 
 # Create all database tables
 Base.metadata.create_all(bind=engine)
@@ -100,11 +102,15 @@ def read_root():
 # 7. PREDICTION ENDPOINT
 # ----------------------------------------------------------------------
 @app.post("/predict")
-def predict_price(listing: ListingFeatures):
+def predict_price(
+    listing: ListingFeatures,
+    db: Session = Depends(get_db)
+):
     """
     Accepts raw listing features, manually one-hot encodes the categorical
     fields to match the training-time feature set, runs the XGBoost model,
-    and returns the predicted price on the original (non-log) scale.
+    persists the prediction to the database, and returns the predicted
+    price on the original (non-log) scale.
     """
     try:
         # ------------------------------------------------------------
@@ -179,6 +185,16 @@ def predict_price(listing: ListingFeatures):
         if predicted_price < 0 or np.isnan(predicted_price):
             raise ValueError("Model produced an invalid price prediction.")
 
+        # ------------------------------------------------------------
+        # STEP 6: Persist this prediction to SQLite via the CRUD layer
+        # so it can be retrieved later (e.g. for the History page).
+        # ------------------------------------------------------------
+        crud.create_prediction(
+            db=db,
+            listing=listing,
+            predicted_price=float(predicted_price)
+        )
+
         return {"predicted_price": round(float(predicted_price), 2)}
 
     except ValueError as ve:
@@ -187,4 +203,4 @@ def predict_price(listing: ListingFeatures):
 
     except Exception as e:
         # Catch-all for unexpected errors (e.g. shape mismatches, model errors).
-        raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}") 
+        raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
