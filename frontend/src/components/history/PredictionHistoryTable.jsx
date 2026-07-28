@@ -260,6 +260,42 @@ function PredictionHistoryTable() {
 
   const hasRows = rows.length > 0;
 
+  function handleExportCSV() {
+    if (rows.length === 0) {
+      alert('No prediction history available to export.');
+      return;
+    }
+
+    const headers = ['Property', 'Neighbourhood', 'Room Type', 'Predicted Price', 'Date', 'Status'];
+
+    const escapeCsvValue = (value) => {
+      const stringValue = value === null || value === undefined ? '' : String(value);
+      if (/[",\n]/.test(stringValue)) {
+        return `"${stringValue.replace(/"/g, '""')}"`;
+      }
+      return stringValue;
+    };
+
+    const csvRows = rows.map((row) =>
+      [row.property, row.neighbourhood, row.roomType, row.price, row.date, row.status]
+        .map(escapeCsvValue)
+        .join(',')
+    );
+
+    const csvContent = [headers.join(','), ...csvRows].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'staywise_prediction_history.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <section className="relative overflow-hidden bg-[#050506] py-20 sm:py-24">
       <style>{`
@@ -328,6 +364,7 @@ function PredictionHistoryTable() {
           <div className="flex items-center gap-3">
             <motion.button
               type="button"
+              onClick={handleExportCSV}
               whileHover={{ y: -2 }}
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
               className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2.5 text-xs font-semibold text-white backdrop-blur-md transition-all duration-400 hover:border-white/25 hover:bg-white/[0.06]"
