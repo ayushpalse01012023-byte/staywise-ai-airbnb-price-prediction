@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   HiOutlineArrowDownTray,
@@ -7,45 +7,7 @@ import {
   HiOutlineInbox,
 } from 'react-icons/hi2';
 import { HiOutlineLocationMarker } from 'react-icons/hi';
-
-const HISTORY_ROWS = [
-  {
-    id: 1,
-    property: 'Cozy Loft',
-    neighbourhood: 'Williamsburg',
-    roomType: 'Entire home/apt',
-    price: 214,
-    date: 'Today',
-    status: 'Successful',
-  },
-  {
-    id: 2,
-    property: 'Sunny Studio',
-    neighbourhood: 'Harlem',
-    roomType: 'Private room',
-    price: 96,
-    date: 'Yesterday',
-    status: 'Successful',
-  },
-  {
-    id: 3,
-    property: 'Modern Flat',
-    neighbourhood: 'Astoria',
-    roomType: 'Entire home/apt',
-    price: 142,
-    date: '25 Jul',
-    status: 'Successful',
-  },
-  {
-    id: 4,
-    property: 'Garden Suite',
-    neighbourhood: 'Chelsea',
-    roomType: 'Private room',
-    price: 176,
-    date: '24 Jul',
-    status: 'Successful',
-  },
-];
+import { getPredictionHistory } from '../../api/historyApi';
 
 const containerVariants = {
   hidden: {},
@@ -172,8 +134,112 @@ function EmptyState() {
   );
 }
 
+// Premium, theme-matched loading state shown while the history is being fetched
+function LoadingState() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="relative overflow-hidden rounded-[24px] border border-white/[0.08] bg-white/[0.02] px-8 py-20 text-center"
+    >
+      <div className="pointer-events-none absolute inset-0 rounded-[24px] bg-gradient-to-b from-white/[0.04] via-transparent to-transparent" />
+
+      <div className="relative mx-auto flex h-14 w-14 items-center justify-center">
+        <span className="absolute inset-0 rounded-full border border-white/[0.08]" />
+        <motion.span
+          className="absolute inset-0 rounded-full border-2 border-transparent"
+          style={{
+            borderTopColor: 'rgba(244,114,182,0.9)',
+            borderRightColor: 'rgba(129,140,248,0.6)',
+          }}
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+        />
+      </div>
+
+      <p className="relative mt-5 text-base font-semibold text-white">Loading history</p>
+      <p className="relative mx-auto mt-2 max-w-xs text-sm leading-[1.7] text-gray-500">
+        Fetching your latest predictions from the server.
+      </p>
+    </motion.div>
+  );
+}
+
+// Error state shown when the history request fails
+function ErrorState({ message }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="relative overflow-hidden rounded-[24px] border border-rose-500/20 bg-rose-500/[0.04] px-8 py-16 text-center"
+    >
+      <div className="pointer-events-none absolute inset-0 rounded-[24px] bg-gradient-to-b from-white/[0.04] via-transparent to-transparent" />
+      <p className="relative text-base font-semibold text-white">Couldn't load prediction history</p>
+      <p className="relative mx-auto mt-2 max-w-xs text-sm leading-[1.7] text-gray-500">
+        {message || 'Something went wrong while fetching your predictions. Please try again.'}
+      </p>
+    </motion.div>
+  );
+}
+
+// Formats an ISO created_at timestamp into a readable local date string
+function formatDate(createdAt) {
+  if (!createdAt) return '';
+  const parsed = new Date(createdAt);
+  if (Number.isNaN(parsed.getTime())) return '';
+  return parsed.toLocaleDateString(undefined, {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+// Maps a raw backend history record into the shape DesktopRow/MobileRowCard expect
+function mapHistoryRecord(record) {
+  return {
+    id: record.id,
+    property: `Prediction #${record.id}`,
+    neighbourhood: record.neighbourhood,
+    roomType: record.room_type,
+    price: record.predicted_price,
+    date: formatDate(record.created_at),
+    status: 'Successful',
+  };
+}
+
 function PredictionHistoryTable() {
-  const [rows] = useState(HISTORY_ROWS);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchHistory() {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await getPredictionHistory();
+        if (!isMounted) return;
+        const mapped = Array.isArray(data) ? data.map(mapHistoryRecord) : [];
+        setRows(mapped);
+      } catch (err) {
+        if (!isMounted) return;
+        setError(err?.message || 'Failed to fetch prediction history.');
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+
+    fetchHistory();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const hasRows = rows.length > 0;
 
   return (
@@ -238,7 +304,7 @@ function PredictionHistoryTable() {
         >
           <div className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-2 text-xs font-medium text-gray-400 backdrop-blur-md">
             <span className="text-gray-500">Total History</span>
-            <span className="font-semibold text-white">128 records</span>
+            <span className="font-semibold text-white">{rows.length} records</span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -264,7 +330,15 @@ function PredictionHistoryTable() {
         </motion.div>
 
         <AnimatePresence mode="wait">
-          {hasRows ? (
+          {loading ? (
+            <div key="loading" className="mt-6">
+              <LoadingState />
+            </div>
+          ) : error ? (
+            <div key="error" className="mt-6">
+              <ErrorState message={error} />
+            </div>
+          ) : hasRows ? (
             <motion.div
               key="table"
               initial={{ opacity: 0, y: 24 }}
