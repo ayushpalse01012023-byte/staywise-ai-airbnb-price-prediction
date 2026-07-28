@@ -64,3 +64,59 @@ def get_predictions(db: Session):
 def delete_all_predictions(db):
     db.query(Prediction).delete()
     db.commit()
+
+# ----------------------------------------------------------------------
+# DASHBOARD ANALYTICS
+# ----------------------------------------------------------------------
+from sqlalchemy import func
+
+
+def get_dashboard_statistics(db: Session):
+    """
+    Returns all dashboard statistics required by the frontend.
+    """
+
+    total_predictions = db.query(Prediction).count()
+
+    average_price = (
+        db.query(func.avg(Prediction.predicted_price))
+        .scalar()
+    )
+
+    highest_price = (
+        db.query(func.max(Prediction.predicted_price))
+        .scalar()
+    )
+
+    lowest_price = (
+        db.query(func.min(Prediction.predicted_price))
+        .scalar()
+    )
+
+    recent_predictions = (
+        db.query(Prediction)
+        .order_by(Prediction.created_at.desc())
+        .limit(5)
+        .all()
+    )
+
+    room_type_distribution = (
+        db.query(
+            Prediction.room_type,
+            func.count(Prediction.id)
+        )
+        .group_by(Prediction.room_type)
+        .all()
+    )
+
+    return {
+        "total_predictions": total_predictions,
+        "average_price": round(float(average_price), 2) if average_price else 0,
+        "highest_price": round(float(highest_price), 2) if highest_price else 0,
+        "lowest_price": round(float(lowest_price), 2) if lowest_price else 0,
+        "recent_predictions": recent_predictions,
+        "room_type_distribution": {
+            room_type: count
+            for room_type, count in room_type_distribution
+        },
+    }
