@@ -1,8 +1,29 @@
+"""
+StayWise AI - CRUD Operations
+=============================
+
+This file contains all database operations (Create, Read, Update, Delete)
+for the StayWise AI application.
+
+Keeping database logic here keeps the FastAPI routes clean and follows
+professional project architecture.
+"""
+
+# ----------------------------------------------------------------------
+# 1. IMPORTS
+# ----------------------------------------------------------------------
 from sqlalchemy.orm import Session
 from models import Prediction
 
 
+# ----------------------------------------------------------------------
+# 2. CREATE A NEW PREDICTION
+# ----------------------------------------------------------------------
 def create_prediction(db: Session, listing, predicted_price):
+    """
+    Saves a new prediction into the SQLite database.
+    """
+
     prediction = Prediction(
         latitude=listing.latitude,
         longitude=listing.longitude,
@@ -24,3 +45,18 @@ def create_prediction(db: Session, listing, predicted_price):
     db.refresh(prediction)
 
     return prediction
+
+
+# ----------------------------------------------------------------------
+# 3. GET ALL PREDICTIONS
+# ----------------------------------------------------------------------
+def get_predictions(db: Session):
+    """
+    Returns all predictions ordered from newest to oldest.
+    """
+
+    return (
+        db.query(Prediction)
+        .order_by(Prediction.created_at.desc())
+        .all()
+    )
