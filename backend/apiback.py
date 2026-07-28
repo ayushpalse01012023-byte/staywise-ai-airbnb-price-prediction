@@ -12,12 +12,15 @@ np.expm1() before being returned to the client.
 # ----------------------------------------------------------------------
 # 1. IMPORTS
 # ----------------------------------------------------------------------
+from datetime import datetime
+from typing import List
+
 import joblib
 import numpy as np
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
 from database import engine, get_db
 from models import Base
@@ -87,6 +90,34 @@ class ListingFeatures(BaseModel):
     availability_365: int = Field(..., ge=0, le=365, description="Days available in a year")
     review_year: int = Field(..., description="Year of the most recent review")
     review_month: int = Field(..., ge=1, le=12, description="Month of the most recent review")
+
+
+# ----------------------------------------------------------------------
+# 5B. RESPONSE SCHEMA (Pydantic Model)
+# ----------------------------------------------------------------------
+class PredictionResponse(BaseModel):
+    """
+    Response schema used to serialize stored prediction records
+    (SQLAlchemy ORM objects) returned by the /history endpoint.
+    """
+    id: int
+    latitude: float
+    longitude: float
+    neighbourhood_group: str
+    neighbourhood: str
+    room_type: str
+    minimum_nights: int
+    number_of_reviews: int
+    reviews_per_month: float
+    calculated_host_listings_count: int
+    availability_365: int
+    review_year: int
+    review_month: int
+    predicted_price: float
+    created_at: datetime
+
+    # Enables Pydantic to read data directly from ORM model attributes.
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ----------------------------------------------------------------------
@@ -204,3 +235,21 @@ def predict_price(
     except Exception as e:
         # Catch-all for unexpected errors (e.g. shape mismatches, model errors).
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
+
+
+# ----------------------------------------------------------------------
+# 8. HISTORY ENDPOINT
+# ----------------------------------------------------------------------
+@app.get("/history", response_model=List[PredictionResponse])
+def get_prediction_history(db: Session = Depends(get_db)):
+    """
+    Retrieves all previously stored predictions from the database,
+    ordered as returned by the CRUD layer, for display on the
+    frontend's History page.
+    """
+    try:
+        return crud.get_predictions(db)
+
+    except Exception as e:
+        # Catch-all for unexpected errors while reading prediction history.
+        raise HTTPException(status_code=500, detail=f"Failed to fetch history: {str(e)}")
