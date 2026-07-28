@@ -60,3 +60,7 @@ def get_predictions(db: Session):
         .order_by(Prediction.created_at.desc())
         .all()
     )
+
+def delete_all_predictions(db):
+    db.query(Prediction).delete()
+    db.commit()
