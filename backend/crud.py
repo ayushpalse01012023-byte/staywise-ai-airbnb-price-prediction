@@ -60,6 +60,63 @@ def get_predictions(db: Session):
         .order_by(Prediction.created_at.desc())
         .all()
     )
+from sqlalchemy import asc, desc
+
+# ----------------------------------------------------------------------
+# SEARCH + FILTER + SORT HISTORY
+# ----------------------------------------------------------------------
+def search_predictions(
+    db: Session,
+    search: str | None = None,
+    room_type: str | None = None,
+    sort: str = "newest",
+):
+    """
+    Search, filter and sort prediction history.
+    """
+
+    query = db.query(Prediction)
+
+    # -----------------------------
+    # Search by neighbourhood
+    # -----------------------------
+    if search:
+        query = query.filter(
+            Prediction.neighbourhood.ilike(f"%{search}%")
+        )
+
+    # -----------------------------
+    # Filter by room type
+    # -----------------------------
+    if room_type:
+        query = query.filter(
+            Prediction.room_type == room_type
+        )
+
+    # -----------------------------
+    # Sorting
+    # -----------------------------
+    if sort == "oldest":
+        query = query.order_by(
+            asc(Prediction.created_at)
+        )
+
+    elif sort == "highest_price":
+        query = query.order_by(
+            desc(Prediction.predicted_price)
+        )
+
+    elif sort == "lowest_price":
+        query = query.order_by(
+            asc(Prediction.predicted_price)
+        )
+
+    else:
+        query = query.order_by(
+            desc(Prediction.created_at)
+        )
+
+    return query.all()
 
 def delete_all_predictions(db):
     db.query(Prediction).delete()
