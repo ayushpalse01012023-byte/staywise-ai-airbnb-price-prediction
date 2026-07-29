@@ -221,7 +221,11 @@ function handleExportCSV(filteredHistory) {
   URL.revokeObjectURL(url);
 }
 
-function PredictionHistoryTable({ filteredHistory, loading, refreshHistory }) {
+function PredictionHistoryTable({
+  filteredHistory = [],
+  loading,
+  refreshHistory,
+}) {
   const [clearing, setClearing] = useState(false);
   const hasRows = filteredHistory?.length > 0;
 
