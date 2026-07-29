@@ -25,6 +25,8 @@ from sqlalchemy.orm import Session
 from database import engine, get_db
 from models import Base
 import crud
+from typing import Optional
+from fastapi import Query
 
 # Create all database tables
 Base.metadata.create_all(bind=engine)
@@ -260,6 +262,34 @@ def get_prediction_history(db: Session = Depends(get_db)):
     except Exception as e:
         # Catch-all for unexpected errors while reading prediction history.
         raise HTTPException(status_code=500, detail=f"Failed to fetch history: {str(e)}")
+
+# ----------------------------------------------------------------------
+# SEARCH + FILTER HISTORY
+# ----------------------------------------------------------------------
+@app.get("/history/search", response_model=List[PredictionResponse])
+def search_history(
+    search: Optional[str] = Query(None),
+    room_type: Optional[str] = Query(None),
+    sort: str = Query("newest"),
+    db: Session = Depends(get_db),
+):
+    """
+    Search, filter and sort prediction history.
+    """
+
+    try:
+        return crud.search_predictions(
+            db=db,
+            search=search,
+            room_type=room_type,
+            sort=sort,
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to search history: {str(e)}"
+        )
 
 # ----------------------------------------------------------------------
 # CLEAR ALL PREDICTION HISTORY
