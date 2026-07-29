@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   HiOutlineArrowDownTray,
@@ -7,7 +7,7 @@ import {
   HiOutlineInbox,
 } from 'react-icons/hi2';
 import { HiOutlineLocationMarker } from 'react-icons/hi';
-import { getPredictionHistory, clearPredictionHistory } from '../../api/historyApi';
+import { clearPredictionHistory } from '../../api/historyApi';
 
 const containerVariants = {
   hidden: {},
@@ -36,7 +36,19 @@ function RoomTypePill({ roomType }) {
   );
 }
 
-function DesktopRow({ row, index }) {
+// Formats an ISO created_at timestamp into a premium, readable date string
+function formatDate(createdAt) {
+  if (!createdAt) return '';
+  const parsed = new Date(createdAt);
+  if (Number.isNaN(parsed.getTime())) return '';
+  return parsed.toLocaleDateString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+function DesktopRow({ row }) {
   return (
     <motion.tr
       variants={rowVariants}
@@ -47,7 +59,7 @@ function DesktopRow({ row, index }) {
         <div
           className="pointer-events-none absolute inset-y-1 left-0 w-0.5 rounded-full bg-gradient-to-b from-rose-400/0 via-rose-400/0 to-indigo-400/0 opacity-0 transition-opacity duration-300 group-hover:from-rose-400/60 group-hover:via-fuchsia-400/60 group-hover:to-indigo-400/60 group-hover:opacity-100"
         />
-        <span className="text-sm font-semibold text-white">{row.property}</span>
+        <span className="text-sm font-semibold text-white">Prediction #{row.id}</span>
       </td>
       <td className="px-5 py-4">
         <span className="flex items-center gap-1.5 text-sm text-gray-400">
@@ -56,24 +68,24 @@ function DesktopRow({ row, index }) {
         </span>
       </td>
       <td className="px-5 py-4">
-        <RoomTypePill roomType={row.roomType} />
+        <RoomTypePill roomType={row.room_type} />
       </td>
       <td className="px-5 py-4">
         <span className="bg-gradient-to-r from-rose-300 via-fuchsia-300 to-indigo-300 bg-clip-text text-sm font-bold text-transparent">
-          ${row.price}
+          ${Number(row.predicted_price).toFixed(2)}
         </span>
       </td>
       <td className="px-5 py-4">
-        <span className="text-sm text-gray-500">{row.date}</span>
+        <span className="text-sm text-gray-500">{formatDate(row.created_at)}</span>
       </td>
       <td className="px-5 py-4">
-        <StatusBadge status={row.status} />
+        <StatusBadge status="Completed" />
       </td>
     </motion.tr>
   );
 }
 
-function MobileRowCard({ row, index }) {
+function MobileRowCard({ row }) {
   return (
     <motion.div
       variants={rowVariants}
@@ -87,24 +99,24 @@ function MobileRowCard({ row, index }) {
       />
       <div className="relative flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold text-white">{row.property}</p>
+          <p className="text-sm font-semibold text-white">Prediction #{row.id}</p>
           <p className="mt-1 flex items-center gap-1.5 text-xs text-gray-500">
             <HiOutlineLocationMarker className="h-3.5 w-3.5 shrink-0 text-gray-600" />
             {row.neighbourhood}
           </p>
         </div>
         <span className="bg-gradient-to-r from-rose-300 via-fuchsia-300 to-indigo-300 bg-clip-text text-lg font-bold text-transparent">
-          ${row.price}
+          ${Number(row.predicted_price).toFixed(2)}
         </span>
       </div>
 
       <div className="relative mt-4 flex items-center justify-between">
-        <RoomTypePill roomType={row.roomType} />
-        <span className="text-xs text-gray-500">{row.date}</span>
+        <RoomTypePill roomType={row.room_type} />
+        <span className="text-xs text-gray-500">{formatDate(row.created_at)}</span>
       </div>
 
       <div className="relative mt-3">
-        <StatusBadge status={row.status} />
+        <StatusBadge status="Completed" />
       </div>
     </motion.div>
   );
@@ -166,54 +178,52 @@ function LoadingState() {
   );
 }
 
-// Error state shown when the history request fails
-function ErrorState({ message }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-      className="relative overflow-hidden rounded-[24px] border border-rose-500/20 bg-rose-500/[0.04] px-8 py-16 text-center"
-    >
-      <div className="pointer-events-none absolute inset-0 rounded-[24px] bg-gradient-to-b from-white/[0.04] via-transparent to-transparent" />
-      <p className="relative text-base font-semibold text-white">Couldn't load prediction history</p>
-      <p className="relative mx-auto mt-2 max-w-xs text-sm leading-[1.7] text-gray-500">
-        {message || 'Something went wrong while fetching your predictions. Please try again.'}
-      </p>
-    </motion.div>
-  );
-}
+function handleExportCSV(filteredHistory) {
+  if (filteredHistory.length === 0) {
+    alert('No prediction history available to export.');
+    return;
+  }
 
-// Formats an ISO created_at timestamp into a readable local date string
-function formatDate(createdAt) {
-  if (!createdAt) return '';
-  const parsed = new Date(createdAt);
-  if (Number.isNaN(parsed.getTime())) return '';
-  return parsed.toLocaleDateString(undefined, {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
-}
+  const headers = ['Prediction ID', 'Neighbourhood', 'Room Type', 'Predicted Price', 'Created Date', 'Status'];
 
-// Maps a raw backend history record into the shape DesktopRow/MobileRowCard expect
-function mapHistoryRecord(record) {
-  return {
-    id: record.id,
-    property: `Prediction #${record.id}`,
-    neighbourhood: record.neighbourhood,
-    roomType: record.room_type,
-    price: record.predicted_price,
-    date: formatDate(record.created_at),
-    status: 'Successful',
+  const escapeCsvValue = (value) => {
+    const stringValue = value === null || value === undefined ? '' : String(value);
+    if (/[",\n]/.test(stringValue)) {
+      return `"${stringValue.replace(/"/g, '""')}"`;
+    }
+    return stringValue;
   };
+
+  const csvRows = filteredHistory.map((row) =>
+    [
+      row.id,
+      row.neighbourhood,
+      row.room_type,
+      Number(row.predicted_price).toFixed(2),
+      formatDate(row.created_at),
+      'Completed',
+    ]
+      .map(escapeCsvValue)
+      .join(',')
+  );
+
+  const csvContent = [headers.join(','), ...csvRows].join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'staywise_prediction_history.csv';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 
-function PredictionHistoryTable() {
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+function PredictionHistoryTable({ filteredHistory, loading, refreshHistory }) {
   const [clearing, setClearing] = useState(false);
+  const hasRows = filteredHistory?.length > 0;
 
   async function handleClearHistory() {
     if (clearing) return;
@@ -224,76 +234,14 @@ function PredictionHistoryTable() {
     setClearing(true);
     try {
       await clearPredictionHistory();
-      setRows([]);
+      if (typeof refreshHistory === 'function') {
+        await refreshHistory();
+      }
     } catch (err) {
       alert(err?.message || 'Failed to clear prediction history. Please try again.');
     } finally {
       setClearing(false);
     }
-  }
-
-  useEffect(() => {
-    let isMounted = true;
-
-    async function fetchHistory() {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await getPredictionHistory();
-        if (!isMounted) return;
-        const mapped = Array.isArray(data) ? data.map(mapHistoryRecord) : [];
-        setRows(mapped);
-      } catch (err) {
-        if (!isMounted) return;
-        setError(err?.message || 'Failed to fetch prediction history.');
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    }
-
-    fetchHistory();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const hasRows = rows.length > 0;
-
-  function handleExportCSV() {
-    if (rows.length === 0) {
-      alert('No prediction history available to export.');
-      return;
-    }
-
-    const headers = ['Property', 'Neighbourhood', 'Room Type', 'Predicted Price', 'Date', 'Status'];
-
-    const escapeCsvValue = (value) => {
-      const stringValue = value === null || value === undefined ? '' : String(value);
-      if (/[",\n]/.test(stringValue)) {
-        return `"${stringValue.replace(/"/g, '""')}"`;
-      }
-      return stringValue;
-    };
-
-    const csvRows = rows.map((row) =>
-      [row.property, row.neighbourhood, row.roomType, row.price, row.date, row.status]
-        .map(escapeCsvValue)
-        .join(',')
-    );
-
-    const csvContent = [headers.join(','), ...csvRows].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'staywise_prediction_history.csv';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
   }
 
   return (
@@ -358,13 +306,13 @@ function PredictionHistoryTable() {
         >
           <div className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-2 text-xs font-medium text-gray-400 backdrop-blur-md">
             <span className="text-gray-500">Total History</span>
-            <span className="font-semibold text-white">{rows.length} records</span>
+            <span className="font-semibold text-white">{filteredHistory.length} records</span>
           </div>
 
           <div className="flex items-center gap-3">
             <motion.button
               type="button"
-              onClick={handleExportCSV}
+              onClick={() => handleExportCSV(filteredHistory)}
               whileHover={{ y: -2 }}
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
               className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2.5 text-xs font-semibold text-white backdrop-blur-md transition-all duration-400 hover:border-white/25 hover:bg-white/[0.06]"
@@ -391,10 +339,6 @@ function PredictionHistoryTable() {
             <div key="loading" className="mt-6">
               <LoadingState />
             </div>
-          ) : error ? (
-            <div key="error" className="mt-6">
-              <ErrorState message={error} />
-            </div>
           ) : hasRows ? (
             <motion.div
               key="table"
@@ -419,8 +363,8 @@ function PredictionHistoryTable() {
                     </tr>
                   </thead>
                   <motion.tbody variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.1 }}>
-                    {rows.map((row, index) => (
-                      <DesktopRow key={row.id} row={row} index={index} />
+                    {filteredHistory.map((row) => (
+                      <DesktopRow key={row.id} row={row} />
                     ))}
                   </motion.tbody>
                 </table>
@@ -433,8 +377,8 @@ function PredictionHistoryTable() {
                 viewport={{ once: true, amount: 0.1 }}
                 className="relative flex flex-col gap-4 p-5 md:hidden"
               >
-                {rows.map((row, index) => (
-                  <MobileRowCard key={row.id} row={row} index={index} />
+                {filteredHistory.map((row) => (
+                  <MobileRowCard key={row.id} row={row} />
                 ))}
               </motion.div>
             </motion.div>
