@@ -141,9 +141,9 @@ function HistoryPage() {
       />
 
       <PredictionHistoryTable
-        history={filteredHistory}
-        loading={loading}
-      />
+    filteredHistory={filteredHistory}
+    loading={loading}
+     />
     </>
   );
 }
