@@ -466,3 +466,119 @@ The trained model is deployed directly within the backend for real-time inferenc
 - ✔ Loaded directly inside **FastAPI** at application startup
 - ✔ Enables **real-time prediction** through the `/predict` endpoint
 - ✔ Prediction results are persisted using **SQLite** for history tracking
+# 🌟 Future Improvements
+
+StayWise AI is built with a scalable foundation, designed to evolve well beyond its current feature set. The roadmap below outlines the planned trajectory of the platform.
+
+| Version | Planned Feature | Description |
+|---|---|---|
+| **v2.0** | 🔐 User Authentication | Introduce secure login and signup functionality for personalized user accounts. |
+| **v2.1** | 🐘 PostgreSQL Database | Migrate from SQLite to PostgreSQL to support scalable, cloud-based storage. |
+| **v2.2** | 📈 Interactive Charts | Add a prediction analytics dashboard with visual trends and insights. |
+| **v2.3** | 🧭 AI Recommendation Engine | Provide intelligent pricing suggestions based on historical prediction patterns. |
+| **v2.4** | 🖼️ Property Image Upload | Enable image-based analysis to enrich prediction accuracy using visual data. |
+| **v2.5** | 🔍 Explainable AI | Visualize feature importance to improve model transparency and trust. |
+| **v3.0** | 🧬 Deep Learning Model | Introduce a neural network-based pricing model for enhanced predictive power. |
+| **v3.1** | 🌐 Real-Time Market Trends | Integrate live Airbnb market data for up-to-date pricing insights. |
+| **v3.2** | 🗺️ Multi-City Prediction | Expand model support to a global, multi-city Airbnb dataset. |
+| **v4.0** | 🤖 AI Assistant | Launch a conversational chatbot to guide hosts through pricing decisions. |
+
+---
+
+## 🚀 Long-Term Vision
+
+StayWise AI is designed to grow far beyond a single-model prediction tool into a complete **AI-powered pricing intelligence platform**. The long-term vision is to serve hosts, data analysts, and property management companies with a unified system that combines predictive modeling, real-time market insights, explainable AI, and intelligent recommendations — transforming pricing from a manual, intuition-driven task into a data-backed, strategic decision. As the platform matures, StayWise AI aims to become the pricing infrastructure layer for modern short-term rental businesses, scaling seamlessly from individual hosts to enterprise-level property portfolios. 🌍💡
+# 🤝 Contributing
+
+Contributions are what make the open-source community such an incredible place to learn, build, and grow. Any contributions you make are **greatly appreciated**.
+
+---
+
+### 🧭 How to Contribute
+
+**1. 🍴 Fork the Repository**
+
+Click the **Fork** button at the top right of this repository to create your own copy.
+
+**2. 📥 Clone the Repository**
+
+```bash
+git clone https://github.com/YOUR-USERNAME/StayWise-AI.git
+cd StayWise-AI
+```
+
+**3. 🌿 Create a Feature Branch**
+
+```bash
+git checkout -b feature/new-feature
+```
+
+**4. 💾 Commit Your Changes**
+
+```bash
+git commit -m "Add new feature"
+```
+
+**5. 🚀 Push to Your Branch**
+
+```bash
+git push origin feature/new-feature
+```
+
+**6. 🔁 Open a Pull Request**
+
+Navigate to the original repository and open a **Pull Request**, describing the changes you've made and why they add value to the project.
+
+---
+
+### 💡 A Note to Contributors
+
+Whether you're fixing a bug, improving documentation, optimizing the machine learning pipeline, or proposing an entirely new feature — your contribution matters. StayWise AI is built to grow with its community, and every pull request, issue, and suggestion helps shape it into a stronger, more capable project. Thank you for taking the time to contribute — we're glad to have you here. 🌟
+# 📜 License
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+
+This project is licensed under the **MIT License** — one of the most permissive and widely adopted open-source licenses available.
+
+The MIT License allows anyone to freely use, copy, modify, merge, publish, distribute, sublicense, and even sell copies of this software, provided that the original copyright notice and license text are included in all copies or substantial portions of the software.
+
+You're welcome to build upon **StayWise AI**, adapt it for your own projects, or use it as a foundation for something greater — a simple credit to the original work is always appreciated. 🌟
+
+See the [LICENSE](LICENSE) file for full details.
+# 👨‍💻 About the Developer
+
+**Ayush Palse** is a Machine Learning enthusiast and Full Stack AI developer with a strong curiosity for building practical, real-world AI applications. With a growing focus on Data Science, XGBoost, and modern web technologies like FastAPI and React, Ayush enjoys bridging the gap between machine learning models and usable, production-style applications.
+
+Driven by continuous learning rather than claimed expertise, Ayush approaches every project as an opportunity to deepen his understanding of AI systems, backend architecture, and frontend engineering — with a clear focus on solving meaningful problems through technology rather than building for the sake of complexity.
+
+StayWise AI reflects this mindset: a hands-on exploration of how machine learning, APIs, and modern UI design can come together to create something genuinely useful.
+
+---
+
+## 🌐 Connect With Me
+
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](YOUR_GITHUB)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](YOUR_LINKEDIN)
+[![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:YOUR_EMAIL)
+[![Portfolio](https://img.shields.io/badge/Portfolio-000000?style=for-the-badge&logo=vercel&logoColor=white)](YOUR_PORTFOLIO)
+
+---
+
+## ⭐ Support
+
+If you found this project valuable or interesting, consider showing some support:
+
+⭐ **Star** the repository to help others discover it
+🍴 **Fork** the project and experiment with your own ideas
+💬 **Share feedback** — suggestions and discussions are always welcome
+
+Every bit of support helps StayWise AI grow and improve. 🚀
+
+---
+
+<p align="center">
+Built with ❤️ using React • FastAPI • XGBoost
+<br />
+<em>"Turning Data into Intelligent Decisions."</em>
+</p>
+
