@@ -22,8 +22,7 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
 };
 
-function FilterSelect({ options, defaultValue }) {
-  const [value, setValue] = useState(defaultValue ?? options[0]);
+function FilterSelect({ options, value, onChange }) {
   const [focused, setFocused] = useState(false);
 
   return (
@@ -41,7 +40,7 @@ function FilterSelect({ options, defaultValue }) {
       />
       <select
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => onChange(e.target.value)}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         className="peer w-full min-w-[9rem] cursor-pointer appearance-none bg-transparent text-sm font-medium text-white outline-none"
@@ -57,7 +56,18 @@ function FilterSelect({ options, defaultValue }) {
   );
 }
 
-function SearchFilter() {
+function SearchFilter({
+  search,
+  setSearch,
+  roomType,
+  setRoomType,
+  priceRange,
+  setPriceRange,
+  dateRange,
+  setDateRange,
+  historyCount,
+  onReset,
+}) {
   const [focused, setFocused] = useState(false);
 
   return (
@@ -142,6 +152,8 @@ function SearchFilter() {
               <input
                 type="text"
                 placeholder="Search property, neighbourhood..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
                 className="w-full bg-transparent text-sm font-medium text-white outline-none placeholder:text-gray-600"
@@ -150,18 +162,19 @@ function SearchFilter() {
 
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap lg:flex-nowrap">
               <motion.div variants={itemVariants}>
-                <FilterSelect options={ROOM_TYPE_OPTIONS} />
+                <FilterSelect options={ROOM_TYPE_OPTIONS} value={roomType} onChange={setRoomType} />
               </motion.div>
               <motion.div variants={itemVariants}>
-                <FilterSelect options={PRICE_RANGE_OPTIONS} />
+                <FilterSelect options={PRICE_RANGE_OPTIONS} value={priceRange} onChange={setPriceRange} />
               </motion.div>
               <motion.div variants={itemVariants}>
-                <FilterSelect options={DATE_OPTIONS} />
+                <FilterSelect options={DATE_OPTIONS} value={dateRange} onChange={setDateRange} />
               </motion.div>
 
               <motion.div variants={itemVariants} whileHover={{ y: -2 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
                 <button
                   type="button"
+                  onClick={onReset}
                   className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-3.5 text-sm font-semibold text-white backdrop-blur-md transition-all duration-400 hover:border-white/25 hover:bg-white/[0.06] sm:w-auto"
                 >
                   <HiOutlineArrowPath className="h-4 w-4" />
@@ -198,7 +211,7 @@ function SearchFilter() {
             <div className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-3.5 py-1.5 text-xs font-medium text-gray-300">
               <HiOutlineChartBarSquare className="h-3.5 w-3.5 text-rose-400" />
               <span className="text-gray-500">Prediction History</span>
-              <span className="font-semibold text-white">128 Records</span>
+              <span className="font-semibold text-white">{historyCount} Records</span>
             </div>
           </div>
         </motion.div>
