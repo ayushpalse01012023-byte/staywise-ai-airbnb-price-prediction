@@ -48,7 +48,8 @@ app = FastAPI(
 # e.g. Live Server on 127.0.0.1:5500) to call this API without CORS errors.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],       # For development. Restrict to specific domains in production.
+    allow_origins=["http://localhost:5173","https://staywise-ai.netlify.app",
+                      ],       # For development. Restrict to specific domains in production.
     allow_credentials=True,
     allow_methods=["*"],       # Allow GET, POST, etc.
     allow_headers=["*"],       # Allow all headers.
